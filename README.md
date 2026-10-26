@@ -64,7 +64,9 @@ npm run build
 
 `test:browser` runs the editor checks in six browser/viewport combinations. Boot
 checks run only with `APPTRON_BOOT=1` in Chromium and require the full runtime.
-They verify a real shell, VM edits captured back into txtar, Python running from
+CI uses `scripts/test-browser-container.sh` with the official image matching the
+installed Playwright version, avoiding repeated OS and browser installation.
+The boot checks verify a real shell, VM edits captured back into txtar, Python running from
 an overlay, and Go compiling offline with gzip bundles mapped from `.tar.br` names.
 For a locally installed browser, the Playwright config accepts
 `PLAYWRIGHT_CHROMIUM_EXECUTABLE`, `PLAYWRIGHT_FIREFOX_EXECUTABLE`, and

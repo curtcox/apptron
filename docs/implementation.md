@@ -67,7 +67,9 @@ are tested with stubs; no real account was charged. Live is.gd availability is
 not required by tests. The owner has requested publication to GitHub Pages. Deployment is controlled
 by `APPTRON_DEPLOY_ENABLED`, and Pages is configured to use GitHub Actions.
 CI runners are pinned to Ubuntu 24.04, which supports the pinned Playwright
-version; Ubuntu 26.04 from ubuntu-latest does not. The Runtime workflow can reuse
+version; Ubuntu 26.04 from ubuntu-latest does not. Browser and VM checks run
+in the matching official Playwright container to avoid intermittent per-job
+browser-download hangs. The Runtime workflow can reuse
 an existing checksum-verified release; new builds
 publish an immutable release and commit the generated lock. Runtime verification
 also checks that the release contains the patches from the current checkout.
