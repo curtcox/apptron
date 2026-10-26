@@ -1,0 +1,11 @@
+--- a/system/bin/init
++++ b/system/bin/init
+@@ -14,7 +14,7 @@
+ ifconfig lo up
+ 
+ # if embedded and no user, skip network/dhcp setup
+-if [ "$ENV_EMBED" == "0" ] && [ -n "$USER" ]; then
++if [ "$ENV_EMBED" == "0" ] && [ -n "$USER" ] && [ -e /sys/class/net/eth0 ]; then
+     ifconfig eth0 up
+     udhcpc -i eth0 -s /bin/post-dhcp
+     export SESSION_IP=$(ifconfig eth0 | grep "inet addr" | cut -d: -f2 | cut -d' ' -f1)

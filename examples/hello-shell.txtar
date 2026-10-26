@@ -1,0 +1,12 @@
+# apptron snapshot v1
+-- .apptron/envrc --
+cd /project
+echo
+echo "Hello from a real Linux VM."
+echo "Try: sh hello.sh"
+echo
+-- hello.sh --
+#!/bin/sh
+printf 'Hello, %s!\n' "${1:-Apptron}"
+printf 'Kernel: '; uname -sr
+printf 'Project files:\n'; ls -la /project

@@ -1,0 +1,86 @@
+name: Runtime
+on:
+  push:
+    branches: [main]
+    paths: ['upstream/apptron', 'patches/**', 'examples/overlays/**', 'scripts/build-*', 'scripts/prepare-runtime.mjs', '.github/workflows/runtime.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: runtime
+  cancel-in-progress: false
+jobs:
+  build:
+    if: vars.APPTRON_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - run: npm ci
+      - name: Update the lock source after a submodule upgrade
+        run: node scripts/sync-runtime-lock.mjs
+      - name: Reuse an existing immutable runtime release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          release=$(node -p "JSON.parse(require('fs').readFileSync('runtime.lock')).release")
+          if gh release view "$release" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo 'exists=true' >> "$GITHUB_OUTPUT"
+            scripts/fetch-runtime.sh
+          else
+            echo 'exists=false' >> "$GITHUB_OUTPUT"
+          fi
+      - run: scripts/build-runtime.sh
+        if: steps.release.outputs.exists != 'true'
+      - name: Lock and verify built artifacts
+        if: steps.release.outputs.exists != 'true'
+        run: |
+          commit=$(git -C upstream/apptron rev-parse HEAD)
+          node scripts/runtime-manifest.mjs "runtime/$commit" --lock
+          node scripts/verify-runtime.mjs "runtime/$commit"
+      - run: npx playwright install --with-deps chromium
+      - name: Boot smoke check, including Python and Go
+        run: npm run test:boot
+      - name: Package immutable release
+        if: steps.release.outputs.exists != 'true'
+        run: |
+          mkdir -p .build
+          commit=$(git -C upstream/apptron rev-parse HEAD)
+          tar -czf .build/runtime.tar.gz -C "runtime/$commit" .
+          node scripts/lock-runtime.mjs "runtime/$commit" .build/runtime.tar.gz
+          cp "runtime/$commit/runtime.json" .build/runtime.json
+          cp runtime.lock .build/runtime.lock
+      - uses: actions/upload-artifact@v4
+        if: steps.release.outputs.exists != 'true'
+        with:
+          name: runtime
+          include-hidden-files: true
+          path: |
+            .build/runtime.tar.gz
+            .build/runtime.json
+            .build/runtime.lock
+      - name: Publish release and lock its checksums
+        if: steps.release.outputs.exists != 'true' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          release=$(node -p "JSON.parse(require('fs').readFileSync('runtime.lock')).release")
+          if gh release view "$release" >/dev/null 2>&1; then
+            echo 'Release already exists. Use a new release name for a rebuild; releases are immutable.'
+            exit 1
+          fi
+          gh release create "$release" .build/runtime.tar.gz .build/runtime.json .build/runtime.lock --title "$release" --notes 'Pinned Apptron runtime. Boot, Python overlay and offline Go smoke checks passed.'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add runtime.lock
+          git diff --cached --quiet || git commit -m 'Lock verified Apptron runtime release'
+          git push

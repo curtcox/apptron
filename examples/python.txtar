@@ -1,0 +1,12 @@
+# apptron snapshot v1
+overlay: gallery/python
+-- .apptron/envrc --
+cd /project
+python3 hello.py
+-- hello.py --
+import sys
+
+print("Hello from Python in Apptron!")
+print(f"Python {sys.version.split()[0]}")
+for n in range(1, 6):
+    print("*" * n)

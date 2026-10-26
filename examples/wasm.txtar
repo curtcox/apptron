@@ -1,0 +1,7 @@
+# apptron snapshot v1
+-- .apptron/envrc --
+cd /project
+chmod +x hello.wasm
+./hello.wasm
+-- hello.wasm (base64) --
+AGFzbQEAAAABDAJgBH9/f38Bf2AAAAIjARZ3YXNpX3NuYXBzaG90X3ByZXZpZXcxCGZkX3dyaXRlAAADAgEBBQMBAAEHEwIGbWVtb3J5AgAGX3N0YXJ0AAEKDwENAEEBQQBBAUEIEAAaCwskAgBBAAsIEAAAABEAAAAAQRALEUhlbGxvIGZyb20gV2FzbSEK

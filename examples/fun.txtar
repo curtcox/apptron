@@ -1,0 +1,8 @@
+# apptron snapshot v1
+overlay: gallery/fun
+-- .apptron/envrc --
+cd /project
+export PATH="$PATH:/usr/games"
+figlet Apptron
+cowsay "Linux, in a browser tab."
+echo "Try: sl"

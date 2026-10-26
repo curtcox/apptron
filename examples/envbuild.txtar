@@ -1,0 +1,10 @@
+# apptron snapshot v1
+-- .apptron/envbuild --
+#!/bin/sh
+set -eu
+apk add --no-cache jq
+-- .apptron/envrc --
+cd /project
+jq . message.json
+-- message.json --
+{"message":"Installed with envbuild and your network relay!"}

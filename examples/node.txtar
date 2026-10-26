@@ -1,0 +1,9 @@
+# apptron snapshot v1
+overlay: gallery/node
+-- .apptron/envrc --
+cd /project
+node hello.js
+-- hello.js --
+console.log('Hello from Node in Apptron!');
+console.log(`Node ${process.version}`);
+console.log([1, 2, 3, 4, 5].map(n => n * n).join(' · '));

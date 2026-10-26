@@ -1,0 +1,10 @@
+# apptron snapshot v1
+-- .apptron/envrc --
+cd /project
+esbuild main.js --bundle --outfile=bundle.js
+echo "Try: cat bundle.js"
+-- main.js --
+import { greeting } from './message.js';
+console.log(greeting('Apptron'));
+-- message.js --
+export const greeting = name => `Hello, ${name}!`;

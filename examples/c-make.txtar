@@ -1,0 +1,19 @@
+# apptron snapshot v1
+overlay: gallery/c
+-- .apptron/envrc --
+cd /project
+echo "Try: make && ./hello"
+-- hello.c --
+#include <stdio.h>
+
+int main(void) {
+    puts("Hello from C in Apptron!");
+    return 0;
+}
+-- Makefile --
+CC = cc
+CFLAGS = -Wall -Wextra -O2
+hello: hello.c
+	$(CC) $(CFLAGS) -o $@ $<
+clean:
+	rm -f hello

@@ -1,0 +1,13 @@
+import { execFileSync } from 'node:child_process';
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+const output = 'dist'; rmSync(output, { recursive: true, force: true }); mkdirSync(output);
+for (const file of ['index.html', 'gallery.html', 'docs.html', 'vm.html', 'data-sw.js', 'favicon.svg', 'runtime.lock', 'src', 'vendor', 'examples', 'LICENSE-graphvizonline']) cpSync(file, `${output}/${file}`, { recursive: true });
+const lock = JSON.parse(readFileSync('runtime.lock'));
+const runtime = `runtime/${lock.commit}`;
+if (!existsSync(`${runtime}/runtime.json`)) throw new Error('Install the locked runtime before packaging.');
+execFileSync(process.execPath, ['scripts/verify-runtime.mjs', runtime], { stdio: 'inherit' });
+cpSync(runtime, `${output}/${runtime}`, { recursive: true });
+writeFileSync(output + '/.nojekyll', '');
+const walk = path => readdirSync(path).reduce((size, name) => size + (statSync(`${path}/${name}`).isDirectory() ? walk(`${path}/${name}`) : statSync(`${path}/${name}`).size), 0);
+const size = walk(output); if (size >= 1_000_000_000) throw new Error('Pages artifact exceeds 1 GB.');
+console.log(`Site packaged in dist/: ${(size / 1048576).toFixed(1)} MiB`);

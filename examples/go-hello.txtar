@@ -1,0 +1,14 @@
+# apptron snapshot v1
+-- .apptron/envrc --
+cd /project
+# Go links executables with mmap; its build directory needs a native tmpfs.
+mount -t tmpfs tmpfs /tmp
+echo "Try: source /etc/goprofile && go run hello.go"
+-- hello.go --
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello from Go in your browser!")
+}
