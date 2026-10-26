@@ -27,7 +27,7 @@
   "homepage": "https://github.com/curtcox/apptron#readme",
   "devDependencies": {
     "@playwright/test": "1.56.1",
-    "ace-builds": "1.43.3",
+    "ace-builds": "1.45.2",
     "fake-indexeddb": "6.2.4",
     "lz-string": "1.5.0",
     "qrcode-generator": "1.4.4"
