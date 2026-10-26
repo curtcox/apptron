@@ -49,6 +49,16 @@ script. Large runtime files are ignored.
 - Runtime manifests verify all 11 runtime files, including four overlays.
 - Gallery images are actual terminal captures. No sample output is simulated.
 
+## Public deployment verification
+
+The site is published at <https://curtcox.github.io/apptron/> using the locked
+runtime release. Browser checks against that public URL verified first-visit
+isolation, shell boot, a VM edit captured into the editor, Python, native WASI,
+Go compilation using the deployed gzip bundles, sharing/QR, gallery/docs, and
+phone layout. No browser page errors or apptron.dev runtime requests occurred.
+Go's status line now returns to Running after lazy bundle downloads finish.
+HashBin integration was left unchanged during deployment work.
+
 ## External setup and limits
 
 HashBin registration is intentionally left to the owner: the meta client ID is

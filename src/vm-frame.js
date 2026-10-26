@@ -32,7 +32,11 @@ window.addEventListener('message', async event => {
     const w = new WanixRuntime(config); window.apptron.instance = w;
     w.screen = document.querySelector('#screen').transferControlToOffscreen();
     window.handleAudio = () => {};
-    w._getBundle = async name => (await gunzip(await load(bundleName(name)), 768 * 1024 * 1024)).buffer;
+    w._getBundle = async name => {
+      const data = await gunzip(await load(bundleName(name)), 768 * 1024 * 1024);
+      if (window.apptron.terminal) status(`Running · ${relay ? 'relay configured' : 'no VM network'} · ${manifest.commit.slice(0, 7)}`);
+      return data.buffer;
+    };
     w._bundle = w._getBundle('sys.tar.gz');
     const wasm = await load('wanix.wasm');
     await w._bundle;

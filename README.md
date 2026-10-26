@@ -4,6 +4,8 @@ A static Linux playground for GitHub Pages. Edit a txtar snapshot, boot a real
 Apptron Linux VM in the same tab, capture project and system changes, and share
 via a compressed URL, QR code, or HashBin.
 
+[Open Apptron Online](https://curtcox.github.io/apptron/)
+
 ## Run locally
 
 Requirements: Node 22+, Docker with Buildx and i386 emulation, and Git.

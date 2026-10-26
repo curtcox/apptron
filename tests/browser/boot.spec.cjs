@@ -15,7 +15,7 @@ test('restores the Docker-built Python overlay and executes Python offline',asyn
  test.setTimeout(240000);await boot(page,readFileSync('examples/python.txtar','utf8'));await expect.poll(()=>text(page),{timeout:90000}).toContain('Hello from Python in Apptron!');
 });
 test('Go gzip bundles load using upstream tar.br names and compile offline',async({page})=>{
- test.setTimeout(300000);await boot(page,readFileSync('examples/go-hello.txtar','utf8'));await expect.poll(()=>text(page),{timeout:90000}).toContain('guest:/project');await page.evaluate(()=>ApptronOnline.host.sendKey('source /etc/goprofile && go run hello.go\r'));await expect.poll(()=>text(page),{timeout:180000}).toContain('Hello from Go in your browser!');
+  test.setTimeout(300000);await boot(page,readFileSync('examples/go-hello.txtar','utf8'));await expect.poll(()=>text(page),{timeout:90000}).toContain('guest:/project');await page.evaluate(()=>ApptronOnline.host.sendKey('source /etc/goprofile && go run hello.go\r'));await expect.poll(()=>text(page),{timeout:180000}).toContain('Hello from Go in your browser!');await expect(page.locator('#status')).toContainText('Running ·');
 });
 
 test('executes the gallery WASI binary natively',async({page})=>{
