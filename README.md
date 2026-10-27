@@ -114,6 +114,7 @@ respective services. A network relay is separate from Pages hosting.
 The original design and milestones are in [docs/plan.md](docs/plan.md).
 Implementation notes and verification limits are in
 [docs/implementation.md](docs/implementation.md). Planned gallery additions are in
-[docs/gallery-plan.md](docs/gallery-plan.md). Adapted sharing modules retain
+[docs/gallery-plan.md](docs/gallery-plan.md). The security model, risks and the
+solution menu are in [docs/security.md](docs/security.md). Adapted sharing modules retain
 [GraphvizOnline's BSD notice](LICENSE-graphvizonline); vendored libraries carry
 licenses in `vendor/`. Apptron and runtime dependencies retain their own licenses.

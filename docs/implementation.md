@@ -34,7 +34,9 @@ A shared snapshot can run arbitrary JavaScript in the site's own origin. This wa
 confirmed with a local spike against the locked runtime
 (`c4cb2dba…`) and the isolation-header server. It is tracked as Phase 0.1 in
 `gallery-plan.md` and must be fixed before the gallery grows, because it already
-affects every share link, gallery load and HashBin load today.
+affects every share link, gallery load and HashBin load today. The full threat
+model, asset inventory, and the menu of solutions are in `security.md`; this entry
+is only the reproduction.
 
 - The guest VM can reach the whole Wanix namespace, including `/web/dom`. From
   the shell, `cat /web/dom/new/script` creates a real `document.createElement`

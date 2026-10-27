@@ -91,9 +91,12 @@ with an append write (`>>`), and appended it to the VM frame's body. The code
 executed in the site origin: it set a flag on `window.top` (the editor page) and
 read that window's `localStorage`, where HashBin OAuth tokens live. Details and
 the exact mechanism are in `docs/implementation.md` under "Security findings".
-The containment patch below is therefore required, not optional. Steps:
+The full threat model and the solution menu — of which the patch below is only the
+stopgap — are in `docs/security.md`; the recommended foundation is origin
+isolation so snapshots keep full DOM power without reaching the user's origin. The
+containment patch below is therefore required, not optional. Steps:
 
-1. ~~Spike~~ Done. Recorded in `docs/implementation.md`.
+1. ~~Spike~~ Done. Recorded in `docs/implementation.md` and `docs/security.md`.
 2. Add a patch in `patches/` that limits the DOM element types the
    VM can create to `div` and `xterm`. The patch also allowlists attributes:
    no `src`, `srcdoc` or `href`, no `on*` handlers, and no `javascript:` or
