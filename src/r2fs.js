@@ -8,11 +8,19 @@ function pathIn(url, base) {
   if (!url.pathname.startsWith(base)) throw new Error('Invalid data path.');
   return safePath(decodeURIComponent(url.pathname.slice(base.length)).replace(/\/$/, ''));
 }
-export async function handleDataRequest(request, store, base = '/data/') {
+export async function handleDataRequest(request, store, base = '/data/', roots) {
+  const response = await dataRequest(request, store, base, roots);
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('Content-Security-Policy', 'sandbox');
+  response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
+  return response;
+}
+async function dataRequest(request, store, base, roots) {
   try {
     const url = new URL(request.url); let index = false;
     if (url.pathname.endsWith('/...') || url.pathname.endsWith('/:')) { index = true; url.pathname = url.pathname.replace(/\/(\.\.\.|:)$/, ''); }
     let path = pathIn(url, base);
+    if (roots && !roots.some(root => within(path, root))) return new Response('Snapshot access denied.', { status: 403 });
     if (!/^(env\/[a-f0-9]{64}\/(project|public)|usr\/[\w-]+)(\/|$)/.test(path)) return new Response('Unknown snapshot mount.', { status: 404 });
     const mount = path.startsWith('env/') ? path.split('/').slice(0, 3).join('/') : path.split('/').slice(0, 2).join('/');
     let attr;

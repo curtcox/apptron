@@ -28,7 +28,7 @@ spikes, rather than assumptions about the upstream API:
 
 ## Security findings
 
-### DOM-bridge sandbox escape (confirmed 2026-10-27, open)
+### DOM-bridge escape (original finding; immediate containment implemented)
 
 A shared snapshot can run arbitrary JavaScript in the site's own origin. This was
 confirmed with a local spike against the locked runtime
@@ -60,12 +60,25 @@ is only the reproduction.
   block it), but the `<script src="data:">` vector is sufficient. The truncate-vs-append
   behavior is a 9p quirk, not a security control, so it must not be relied on.
 
-Planned mitigation (Phase 0.1 in `gallery-plan.md`): a `patches/` change that
-limits the DOM element types the guest can create to `div` and `xterm` and
-allowlists attributes (no `src`/`srcdoc`/`href`, no `on*`, no `javascript:`/`data:`
-URLs), with a boot test that the bypass fails; longer term, serve the VM frame
-from a separate origin. The spike scripts live outside the repo (session
-scratchpad) and are not committed.
+The current containment patches close script/iframe allocation, unsafe attributes,
+CSS injection, raw workers and gojs, origin-wide storage, pickerfs and downloads.
+The exact relay is the only permitted WebSocket target. The runtime exports
+static page support scripts with SRI so the frame CSP does not need inline,
+data, or blob page scripts. It still allows blob workers and Wasm compilation.
+The host uses a validated bridge for key input, resize, project/overlay capture
+and reset; filesystem operations execute in the VM document.
+HTTP data mounts require revocable boot grants and all data responses are inert.
+Overlay validation, CID integrity, draft provenance/replacement consent, relay
+session consent and trusted-area labels are implemented too.
+
+The B1 spike in `tests/browser/isolation-spike.spec.cjs` rules out an opaque
+origin for this runtime: no IndexedDB or OPFS in the tested engines, and no
+SharedArrayBuffer in Chromium. B2 is prepared with configurable, pinned origins and a storage/capture/reset
+bridge, validated against a real VM on a second local origin. Production hosting
+is not activated; see `deployment.md` for artifact builds and required headers. The token vault and
+capability broker are still pending. Same-origin frame execution remains unsafe;
+full DOM and Go/JS access must stay closed. See `security.md`'s implementation
+status for the remaining architecture and its storage-isolation caveat.
 
 ## Implemented
 
@@ -78,19 +91,27 @@ script. Large runtime files are ignored.
 
 ## Verification
 
-- 19 Node tests pass for txtar, limits, UUIDs, r2fs, tar/gzip, overlay storage,
+- 29 Node tests pass for txtar, limits, UUIDs, r2fs, tar/gzip, overlay storage,
   sharing, HashBin documents and OAuth restoration, QR limits and relay URLs.
 - Editor browser checks cover Chromium, Firefox and WebKit at desktop and phone
-  sizes (30 checks). Firefox was run in the official Playwright Linux container
-  because the cached macOS build could not create its temporary profile.
+  sizes, plus hostile-input/CSP/consent checks and the opaque-origin spike
+  (70 pass, two Firefox service-worker cases skipped). Firefox cannot evaluate
+  this module service worker; it reports the error and VM boot fails closed.
+  All three engines reject IndexedDB in the opaque frame; only Chromium loses
+  SharedArrayBuffer too.
 - Real Chromium boot checks verify a shell, a shell-written file captured into
   the editor, the Docker-built Python overlay offline, offline Go compilation,
   native WASI execution, and a captured overlay restored into a fresh VM with Python and scratch files intact.
 - The optional worker relay builds and accepts a localhost WebSocket connection.
-- Runtime manifests verify all 11 runtime files, including four overlays.
+- Four separate-origin checks verify editor DOM/storage denial, bridge capture,
+  reload/reset, WASI, Python overlays and failure when VM headers are missing.
+- Runtime manifests verify all 19 runtime files, including four overlays.
 - Gallery images are actual terminal captures. No sample output is simulated.
 
 ## Public deployment verification
+
+This section records the earlier public release. The security hardening above
+is verified locally; its new immutable runtime release has not been published.
 
 The site is published at <https://curtcox.github.io/apptron/> using the locked
 runtime release. Browser checks against that public URL verified first-visit
@@ -120,3 +141,10 @@ capture skips symlinks and reports omissions. Set permissions in envrc.
 Overlays preserve files, modes and links, but not deletion of base-image files.
 Physical phone keyboard behavior still needs real-device testing. Browser
 viewport tests do not establish real-device compatibility.
+
+The pinned upstream drops the leading slash when Linux creates an absolute
+symlink (`ln -s /...`). This was reproduced with the original checksum-verified
+runtime too. Relative symlinks remain the supported creation path; prebuilt
+archive symlink targets are preserved by overlay restore. The security backend
+rejects direct symlink dereferencing against the database root and provides
+read-only no-follow inspection for namespace adapters.

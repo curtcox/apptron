@@ -118,3 +118,11 @@ Implementation notes and verification limits are in
 solution menu are in [docs/security.md](docs/security.md). Adapted sharing modules retain
 [GraphvizOnline's BSD notice](LICENSE-graphvizonline); vendored libraries carry
 licenses in `vendor/`. Apptron and runtime dependencies retain their own licenses.
+
+## Separate VM hosting
+
+The VM-origin split is prepared but disabled by default. See
+[deployment instructions](docs/deployment.md) for the two artifact builds,
+origin pins and first-response headers. The VM host must support those headers;
+the editor may stay on Pages. A credential vault cannot share the VM origin and
+is still separate work.

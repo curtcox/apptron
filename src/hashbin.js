@@ -1,20 +1,11 @@
+import { decode64, cidLength, isCID, verifyCID } from './content-id.js';
 import { parseSnapshot } from './snapshot.js';
 import { readLimited } from './apptron-host.js';
 /** Adapted from curtcox/ManimOnline; see LICENSE-graphvizonline. */
 const HashBinDocuments = {
   MAX_BYTES: 5 * 1024 * 1024,
   bytes(value) { return value instanceof Uint8Array ? value : new TextEncoder().encode(value); },
-  decode64(value) { return Uint8Array.from(atob(value.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)); },
-  cidLength(cid) { return this.decode64(cid.slice(0, 8)).reduce((n, b) => n * 256 + b, 0); },
-  isCID(value) {
-    if (typeof value !== 'string' || !/^[A-Za-z0-9_-]{8,94}$/.test(value)) return false;
-    let length; try { length = this.cidLength(value); } catch { return false; }
-    if (value.length !== 8 + (length <= 64 ? Math.ceil(length * 4 / 3) : 86)) return false;
-    // Reject noncanonical base64 trailing bits, so ordinary source hashes stay source.
-    const rest = this.decode64(value.slice(8));
-    const encoded = btoa(String.fromCharCode(...rest)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    return encoded === value.slice(8);
-  },
+  decode64, cidLength, isCID,
   cid(input) {
     const text = input.trim().replace(/^#/, '');
     if (this.isCID(text)) return text;
@@ -74,7 +65,9 @@ class HashBinStore {
       if (HashBinDocuments.cidLength(cid) <= 64) return HashBinDocuments.parse(new TextDecoder('utf-8', { fatal: true }).decode(HashBinDocuments.decode64(cid.slice(8))));
       const response = await this.fetchSource(`https://256t.us/${cid}`, { signal });
       if (!response.ok) throw new Error(response.status === 404 ? 'Saved source was not found. It may have expired or been deleted.' : `HashBin load failed (HTTP ${response.status}).`);
-      return HashBinDocuments.parse(new TextDecoder('utf-8', { fatal: true }).decode(await readLimited(response, HashBinDocuments.MAX_BYTES)));
+      const data = await readLimited(response, HashBinDocuments.MAX_BYTES);
+      await verifyCID(cid, data);
+      return HashBinDocuments.parse(new TextDecoder('utf-8', { fatal: true }).decode(data));
     });
   }
   async init() {

@@ -76,9 +76,9 @@ Hard limits that set the boundaries:
 
 ### 0.1 Contain the DOM bridge (security, do first)
 
-The VM iframe (`vm.html`) is same-origin with the editor and has no `sandbox`
-attribute (`src/apptron-host.js:58`). From the source, any snapshot's `envrc`
-looks able to create a `script` or `iframe` element through `/web/dom`, set its
+The VM iframe (`vm.html`) remains same-origin with the editor. Its current
+`allow-same-origin` sandbox is not an origin boundary. Before containment, any
+snapshot's `envrc` could create a `script` or `iframe` element through `/web/dom`, set its
 `src` or `srcdoc` through `attrs`, and run JavaScript in the site's origin. That
 origin holds HashBin OAuth tokens (`localStorage` key prefix `apptron:oauth:`,
 `src/app.js:42`). On GitHub Pages, `curtcox.github.io` is also the origin of the
@@ -94,7 +94,15 @@ the exact mechanism are in `docs/implementation.md` under "Security findings".
 The full threat model and the solution menu — of which the patch below is only the
 stopgap — are in `docs/security.md`; the recommended foundation is origin
 isolation so snapshots keep full DOM power without reaching the user's origin. The
-containment patch below is therefore required, not optional. Steps:
+containment patch below is therefore required, not optional.
+
+The current checkout implements the immediate containment, storage scoping, CSP,
+CID/overlay checks, draft/relay consent and bridge groundwork; hostile boot tests
+cover them. The opaque-origin spike fails the runtime's storage requirements
+(and SharedArrayBuffer in Chromium). The B2 VM path is prepared and awaits a hosting origin. The credential vault
+and capability broker remain separate pending work. See `security.md`'s implementation
+status before extending browser-reaching examples. The original checklist follows:
+
 
 1. ~~Spike~~ Done. Recorded in `docs/implementation.md` and `docs/security.md`.
 2. Add a patch in `patches/` that limits the DOM element types the

@@ -2,7 +2,7 @@ name: Runtime
 on:
   push:
     branches: [main]
-    paths: ['upstream/apptron', 'patches/**', 'examples/overlays/**', 'scripts/build-*', 'scripts/prepare-runtime.mjs', '.github/workflows/runtime.yml']
+    paths: ['upstream/apptron', 'patches/**', 'examples/overlays/**', 'scripts/build-*', 'scripts/prepare-runtime.mjs', 'scripts/runtime-patches.mjs', '.github/workflows/runtime.yml']
   workflow_dispatch:
 permissions:
   contents: write
@@ -49,6 +49,16 @@ jobs:
           node scripts/verify-runtime.mjs "runtime/$commit"
       - name: Boot smoke check, including Python and Go
         run: APPTRON_BOOT=1 scripts/test-browser-container.sh tests/browser/boot.spec.cjs --project=chromium
+      - name: Prepare paired artifacts for isolation checks
+        run: |
+          npm run build -- --role vm --editor-origin http://127.0.0.1:4173 --vm-url http://127.0.0.1:4174/apptron/vm.html
+          npm run build -- --role editor --editor-origin http://127.0.0.1:4173 --vm-url http://127.0.0.1:4174/apptron/vm.html --out .build/editor-site
+      - name: Verify separate-origin VM artifacts
+        env:
+          APPTRON_BOOT: '1'
+          APPTRON_EDITOR_SITE_DIR: .build/editor-site
+          APPTRON_VM_SITE_DIR: .build/vm-site
+        run: scripts/test-browser-container.sh tests/browser/isolation.spec.cjs --project=chromium
       - name: Package immutable release
         if: steps.release.outputs.exists != 'true'
         run: |

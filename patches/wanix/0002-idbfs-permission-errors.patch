@@ -1,0 +1,43 @@
+--- a/web/idbfs/idbfs.go
++++ b/web/idbfs/idbfs.go
+@@ -56,6 +56,8 @@
+ 	}
+ 	code := err.Value.Get("code").String()
+ 	switch code {
++	case "EACCES":
++		return fs.ErrPermission
+ 	case "ENOENT":
+ 		return fs.ErrNotExist
+ 	case "EEXIST":
+@@ -85,6 +87,15 @@
+ 	fsys.log = logger
+ }
+ 
++// Namespace adapters use no-follow opens to inspect a link itself. Normal
++// opens may not resolve a link against this origin-wide backing database.
++func (fsys *FS) OpenContext(ctx context.Context, name string) (fs.File, error) {
++	if fs.FollowSymlinks(ctx) { return fsys.Open(name) }
++	v, err := jsutil.AwaitErr(fsys.Call("openNoFollow", name))
++	if err != nil { return nil, convertErr(err) }
++	return NewFile(v), nil
++}
++
+ func (fsys *FS) Open(name string) (f fs.File, err error) {
+ 	defer func() {
+ 		fsys.log.Printf("open %s: %v", name, err)
+--- a/web/idbfs/idbfs.js
++++ b/web/idbfs/idbfs.js
+@@ -575,6 +575,13 @@
+         }
+ 
+         return meta;
++    }
++
++    async openNoFollow(path) {
++        path = this._normalizePath(path);
++        const meta = await this._getMetadata(path);
++        if (!meta) throw new IDBFSError('No such file or directory', 'ENOENT');
++        return new File(this, path, meta, O_RDONLY);
+     }
+ 
+     async open(path) {

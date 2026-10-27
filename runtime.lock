@@ -1,13 +1,13 @@
 {
   "version": 1,
   "commit": "c4cb2dba29dd245638b55674f6d38ea9cf97a92b",
-  "release": "runtime-c4cb2dba29dd245638b55674f6d38ea9cf97a92b",
-  "manifestSha256": "1afbb0f11d646c186e00834c19fc936567147351517f943f09ddfa1173f70a53",
+  "release": "runtime-c4cb2dba29dd245638b55674f6d38ea9cf97a92b-ee604c1e18d5",
+  "manifestSha256": "630e13a26eee2c8f83469bc2a3cd4dd441049c3c81faedd121a12ef13a3c18f8",
   "images": {
     "kernel": "ghcr.io/tractordev/apptron@sha256:0f3e1163af759249a2fc855f508e7ef583293d25e9a1ff3dae25a0f34e693d94",
     "v86": "ghcr.io/progrium/v86@sha256:90b1db1bd7081890f96c4ee70f51bff670ce6b524a3a941e5345b588dfcef7ce"
   },
   "loaderSource": "2b310a9cbd1a5b328ee425ff3d607c1a1562e14e",
   "rejectedLoaderImage": "ghcr.io/tractordev/wanix@sha256:85ed5f87bbeffec872a0138e900ca9cc044283bb7df43ad43e95151592d34d20",
-  "archiveSha256": "acad874e4031cdf8ff85211329404a95c81b6e00b85e08400b83d973783997c4"
+  "patchSetSha256": "ee604c1e18d5eadf1512f968338871e1da3ec4a87f554ee3a438bb7f4e3bfca7"
 }

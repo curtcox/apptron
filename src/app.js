@@ -1,17 +1,19 @@
+import { deployment } from './deployment.js';
+import { readDraft, writeDraft, provenance, provenanceLabel } from './draft.js';
 import { ApptronHost, ensureServiceWorker } from './apptron-host.js';
 import { parseSnapshot, serializeSnapshot, MAX_TEXT_BYTES } from './snapshot.js';
-import { captureSnapshot } from './capture.js';
-import { captureOverlay, MAX_OVERLAY_BYTES } from './overlay.js';
+import { MAX_OVERLAY_BYTES } from './overlay.js';
 import { ShareLinks, ShareClient, readShareURL } from './share-links.js';
 import { HashBinDocuments, HashBinStore } from './hashbin.js';
 import { HashBinPanel } from './hashbin-panel.js';
 import { renderQR } from './qr-panel.js';
-import { getRelay, setRelay } from './network.js';
+import { getRelay, setRelay, approveRelay } from './network.js';
 import { loadExample } from './examples.js';
 import { setupKeybar } from './keybar.js';
 import { installTxtarMode } from './txtar-mode.js';
 const $ = id => document.getElementById(id);
 const status = message => { $('status').textContent = message; };
+try { deployment(); } catch (error) { status(error.message); for (const button of document.querySelectorAll('button')) button.disabled = true; throw error; }
 const storage = (kind, prefix) => ({
   getItem: key => { try { return window[kind].getItem(prefix + key); } catch { return null; } },
   setItem: (key, value) => window[kind].setItem(prefix + key, value),
@@ -26,30 +28,33 @@ editor.renderer.setPadding(17); editor.renderer.setScrollMargin(14, 14);
 const host = new ApptronHost($('terminal'), status);
 const shareClient = new ShareClient();
 let dirty = false, applying = false, revision = 0, draftTimer, savedLink, shareVersion, overlayBlob, overlayURL;
+let sourceOrigin = provenance();
+const saveDraft = () => local.setItem('draft', writeDraft(source(), sourceOrigin));
 const source = () => editor.getValue();
 function sourceChanged() {
   revision++; savedLink = null; shareClient.cancel(); panel?.cancelLoad();
-  if (!applying) dirty = true;
+  if (!applying) { dirty = true; if (sourceOrigin.kind === 'example') sourceOrigin = provenance('local'); }
+  $('source-provenance').textContent = provenanceLabel(sourceOrigin);
   const size = new TextEncoder().encode(source()).length;
   $('source-size').textContent = size > 1024 ? (size / 1024).toFixed(1) + ' KiB' : size + ' B';
   try { const snapshot = parseSnapshot(source()); $('file-count').textContent = `${snapshot.files.length} file${snapshot.files.length === 1 ? '' : 's'}`; }
   catch { $('file-count').textContent = size > MAX_TEXT_BYTES ? 'Over 1 MiB limit' : 'Check snapshot format'; }
-  clearTimeout(draftTimer); draftTimer = setTimeout(() => { try { local.setItem('draft', source()); } catch { status('Draft could not be stored. Download or share your snapshot to keep a copy.'); } }, 300);
+  clearTimeout(draftTimer); draftTimer = setTimeout(() => { try { saveDraft(); } catch { status('Draft could not be stored. Download or share your snapshot to keep a copy.'); } }, 300);
 }
-function setSource(value) { parseSnapshot(value); applying = true; editor.setValue(value, -1); applying = false; dirty = false; }
-function replaceSource(value) { if (dirty && !confirm('Replace your unsaved editor changes with this snapshot?')) return false; setSource(value); return true; }
-function view(name) { document.body.dataset.view = name; $('show-code').setAttribute('aria-pressed', String(name === 'code')); $('show-preview').setAttribute('aria-pressed', String(name === 'preview')); editor.resize(); host.frame?.contentWindow.dispatchEvent(new Event('resize')); }
+function setSource(value, origin = provenance('local')) { parseSnapshot(value); sourceOrigin = origin; applying = true; editor.setValue(value, -1); applying = false; dirty = false; }
+function replaceSource(value, origin = sourceOrigin) { if (dirty && !confirm('Replace your unsaved editor changes with this snapshot?')) return false; setSource(value, origin); return true; }
+function view(name) { document.body.dataset.view = name; $('show-code').setAttribute('aria-pressed', String(name === 'code')); $('show-preview').setAttribute('aria-pressed', String(name === 'preview')); editor.resize(); host.resize(); }
 const store = new HashBinStore({ clientId: document.querySelector('meta[name="hashbin-client-id"]').content, redirectUri: new URL('./', location.href).href, storage: storage('localStorage', 'apptron:oauth:'), transactionStorage: session });
 let panel = new HashBinPanel({ store, getSnapshot: () => { parseSnapshot(source()); return { src: source(), type: 'apptron' }; }, getFingerprint: source,
   onLoad: (snapshot, cid) => {
-    if (!replaceSource(snapshot.src)) return;
+    if (!replaceSource(snapshot.src, provenance('hashbin', cid))) return false;
     $('hashbin-load-dialog').close(); savedLink = { source: source(), url: HashBinDocuments.link(location.href, cid) }; status('Loaded snapshot. Press Run to boot it.');
   },
   onSaved: (cid, fingerprint, link, overlay) => {
     if (overlay) {
       const snapshot = parseSnapshot(source());
       snapshot.header = snapshot.header.replace(/^overlay:.*\n?/gm, '') + `\noverlay: ${cid}`;
-      setSource(serializeSnapshot(snapshot));
+      setSource(serializeSnapshot(snapshot), sourceOrigin);
       status('Overlay saved. Its CID is now in your snapshot. Share or save the snapshot too.');
     } else { savedLink = { source: fingerprint, url: link }; dirty = false; }
   }
@@ -61,9 +66,12 @@ $('run').onclick = async () => {
   if ($('run').disabled) return;
   const text = source();
   try {
-    parseSnapshot(text); $('run').disabled = true; $('run').textContent = 'Booting…'; $('vm-dot').classList.add('muted');
+    parseSnapshot(text);
+    const relay = approveRelay(value => confirm(`Allow this snapshot to use the network through ${value}? This relay was not approved in this session. It can reach services on your network. Clear it in Network to stay offline.`));
+    networkLabel();
+    $('run').disabled = true; $('run').textContent = 'Booting…'; $('vm-dot').classList.add('muted');
     if (matchMedia('(max-width:760px)').matches) view('preview');
-    await host.run(text, { allowMismatch: commit => confirm(`This overlay was made for runtime ${commit.slice(0, 7)}. It may not work with this runtime. Load it anyway?`) });
+    await host.run(text, { relay, allowMismatch: commit => confirm(`This overlay was made for runtime ${commit.slice(0, 7)}. It may not work with this runtime. Load it anyway?`) });
     if (host.running) { $('vm-dot').classList.remove('muted'); dirty = false; }
   } catch (error) { status(error.message); }
   finally { $('run').disabled = false; $('run').innerHTML = '<span aria-hidden="true">▶</span> Run'; }
@@ -80,9 +88,9 @@ $('capture').onclick = async () => {
   const version = revision; $('capture').disabled = true; status('Waiting for Apptron’s file sync…');
   try {
     await new Promise(resolve => setTimeout(resolve, 5500));
-    const result = await captureSnapshot(host.store, host.uuid, host.snapshot);
+    const result = await host.captureSnapshot();
     if (revision !== version) { status('Editor changed during capture. Capture again to replace it.'); return; }
-    setSource(result.source); host.source = result.source;
+    setSource(result.source, sourceOrigin.kind === 'example' ? provenance('local') : sourceOrigin); host.source = result.source;
     status(result.skipped.length ? `Captured project. Skipped: ${result.skipped.join(', ')}` : 'Project files captured into the editor.');
     view('code');
   } catch (error) { status(error.message); }
@@ -117,10 +125,11 @@ $('qr').onclick = () => {
 };
 $('qr-hashbin').onclick = () => { $('qr-dialog').close(); panel.openSave(); };
 $('hashbin-open').onclick = () => $('hashbin-load-dialog').showModal();
-const networkLabel = () => { $('network-state').textContent = getRelay() ? '◉ Relay configured' : '○ No VM network'; };
+const networkLabel = () => { const relay = getRelay(); $('network-state').textContent = relay ? `◉ Relay configured: ${relay}` : '○ No VM network'; $('run').title = relay ? `Run with relay ${relay}` : 'Run without VM network'; };
+window.addEventListener('storage', event => { if (event.key === 'apptron:relay' || event.key === null) networkLabel(); });
 $('network-open').onclick = () => { $('relay-url').value = getRelay(); $('network-message').textContent = ''; $('network-dialog').showModal(); };
 $('network-save').onclick = () => {
-  try { setRelay($('relay-url').value); networkLabel(); $('network-dialog').close(); status('Network setting saved. Press Run to apply it.'); }
+  try { setRelay($('relay-url').value); host.stop(); $('vm-dot').classList.add('muted'); networkLabel(); $('network-dialog').close(); status('Network setting saved. VM stopped; press Run to apply it.'); }
   catch (error) { $('network-message').textContent = error.message; }
 };
 $('dismiss-notice').onclick = () => { $('network-notice').hidden = true; try { local.setItem('network-notice-dismissed', '1'); } catch { /* Optional preference. */ } };
@@ -133,7 +142,7 @@ $('capture-overlay').onclick = async () => {
   if (!host.running) { status('Run a snapshot before capturing a disk overlay.'); return; }
   $('capture-overlay').disabled = true; status('Capturing changed system files…');
   try {
-    overlayBlob = await captureOverlay(host.instance, host.lock.commit, host.uuid);
+    overlayBlob = await host.captureOverlay();
     if (overlayURL) URL.revokeObjectURL(overlayURL);
     overlayURL = URL.createObjectURL(new Blob([overlayBlob], { type: 'application/gzip' }));
     $('overlay-download').href = overlayURL;
@@ -148,23 +157,32 @@ for (const button of document.querySelectorAll('[data-close]')) button.onclick =
 document.addEventListener('click', event => { if (!event.target.closest('.more')) document.querySelector('.more').open = false; });
 new ResizeObserver(() => editor.resize()).observe($('editor'));
 async function initialize() {
-  let initial = local.getItem('draft') || await loadExample('hello-shell');
+  const draft = readDraft(local.getItem('draft'));
+  if (draft?.provenance.kind === 'example') {
+    try { if (draft.source !== await loadExample(draft.provenance.detail)) draft.provenance = provenance('stored'); }
+    catch { draft.provenance = provenance('stored'); }
+  }
+  setSource(draft?.source || await loadExample('hello-shell'), draft?.provenance || provenance('example', 'hello-shell'));
+  // A persisted draft may hold unsaved work even after a reload.
+  dirty = !!draft;
   try {
     const callback = await store.callback(location.search);
     if (callback) {
-      if (callback.snapshot?.src) initial = callback.snapshot.src;
+      if (callback.snapshot?.src && callback.snapshot.src !== source()) replaceSource(callback.snapshot.src, provenance('stored'));
       const url = new URL(location.href); for (const key of ['code', 'state', 'error', 'error_description']) url.searchParams.delete(key); history.replaceState(null, '', url);
       status(callback.error || 'Connected to HashBin. Choose Save to review the price.');
     } else {
       const cid = HashBinDocuments.cid(location.hash);
       const example = new URL(location.href).searchParams.get('example');
-      if (cid) { setSource(initial); await panel.load(cid); return; }
+      if (cid) { await panel.load(cid); return; }
       const shared = readShareURL(location.href, LZString.decompressFromEncodedURIComponent);
-      if (shared !== null) initial = shared;
-      else if (example) initial = await loadExample(example);
+      if (shared !== null && shared !== source()) replaceSource(shared, provenance('share'));
+      else if (example) {
+        const value = await loadExample(example);
+        if (value !== source()) replaceSource(value, provenance('example', example));
+      }
     }
-    setSource(initial);
-  } catch (error) { status(error.message); try { setSource(local.getItem('draft') || await loadExample('hello-shell')); } catch { setSource(await loadExample('hello-shell')); } }
+  } catch (error) { status(error.message); }
 }
 async function initializeWithIsolation() {
   await initialize();
@@ -172,7 +190,7 @@ async function initializeWithIsolation() {
     await ensureServiceWorker();
     const key = 'apptron:isolation-reload';
     if (!crossOriginIsolated && !session.getItem(key)) {
-      local.setItem('draft', source()); session.setItem(key, '1'); location.reload();
+      saveDraft(); session.setItem(key, '1'); location.reload();
     } else if (crossOriginIsolated) session.removeItem(key);
     else status('Browser isolation is unavailable. Wasm executables need a reload or another supported browser.');
   } catch (error) { status(error.message); }

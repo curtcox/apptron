@@ -30,7 +30,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: scripts/test-browser-container.sh tests/browser/editor.spec.cjs --project=${{ matrix.browser }} --project=${{ matrix.browser }}-phone
+      - run: scripts/test-browser-container.sh tests/browser/editor.spec.cjs tests/browser/security.spec.cjs tests/browser/isolation-spike.spec.cjs --project=${{ matrix.browser }} --project=${{ matrix.browser }}-phone
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -65,6 +65,16 @@ jobs:
             node scripts/runtime-manifest.mjs "runtime/$commit" --lock
           fi
       - run: APPTRON_BOOT=1 scripts/test-browser-container.sh tests/browser/boot.spec.cjs --project=chromium
+      - name: Prepare paired artifacts for isolation checks
+        run: |
+          npm run build -- --role vm --editor-origin http://127.0.0.1:4173 --vm-url http://127.0.0.1:4174/apptron/vm.html
+          npm run build -- --role editor --editor-origin http://127.0.0.1:4173 --vm-url http://127.0.0.1:4174/apptron/vm.html --out .build/editor-site
+      - name: Verify separate-origin VM artifacts
+        env:
+          APPTRON_BOOT: '1'
+          APPTRON_EDITOR_SITE_DIR: .build/editor-site
+          APPTRON_VM_SITE_DIR: .build/vm-site
+        run: scripts/test-browser-container.sh tests/browser/isolation.spec.cjs --project=chromium
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

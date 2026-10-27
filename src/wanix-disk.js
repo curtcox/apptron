@@ -1,5 +1,6 @@
 // Apptron’s pinned Wanix IDBFS v2 schema. Used only before starting a VM.
 import { openDatabase, transactionDone, requestResult } from './store.js';
+import { validateOverlayEntries } from './overlay.js';
 import { bytes } from './snapshot.js';
 export class WanixDisk {
   async db() {
@@ -18,6 +19,8 @@ export class WanixDisk {
     await done;
   }
   async restore(uuid, entries) {
+    if (!/^[a-f0-9]{64}$/.test(uuid)) throw new Error('Invalid snapshot identity.');
+    validateOverlayEntries(entries);
     const prefix = `env/${uuid}/overlay`;
     await this.clear([prefix]);
     const db = await this.db(); const tx = db.transaction(['metadata', 'data'], 'readwrite'); const done = transactionDone(tx);
@@ -31,7 +34,7 @@ export class WanixDisk {
     for (let e of entries) {
       if (e.path === '.apptron-overlay.json') continue;
       if (e.type === '1') {
-        const target = byPath.get(e.linkname.replace(/^\.\//, ''));
+        const target = byPath.get(e.linkname.replace(/^(\.\/)+/, ''));
         if (!target || target.type !== '0') throw new Error('Overlay has an unsupported hard link.');
         e = { ...target, path: e.path };
       }

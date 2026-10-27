@@ -32,6 +32,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
       - run: npm run build
+        env:
+          APPTRON_VM_URL: ${{ vars.APPTRON_VM_URL }}
+          APPTRON_EDITOR_ORIGIN: ${{ vars.APPTRON_EDITOR_ORIGIN }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

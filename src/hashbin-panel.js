@@ -33,7 +33,7 @@ class HashBinPanel {
     try {
       const snapshot = await this.store.load(cid);
       if (revision !== this.revision) return;
-      this.onLoad(snapshot, cid);
+      if (this.onLoad(snapshot, cid) === false) { this.status.textContent = 'Load cancelled. Current snapshot kept.'; return; }
       this.status.textContent = 'Loaded from HashBin.';
     } catch (error) { if (revision === this.revision) this.status.textContent = error.message; }
   }

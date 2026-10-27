@@ -1,0 +1,279 @@
+--- a/runtime/runtime.js
++++ b/runtime/runtime.js
+@@ -118,15 +118,15 @@
+         const wasmBytes = new Uint8Array(buffer);
+         const wasmString = new TextDecoder('utf-8', { ignoreBOM: true, fatal: false }).decode(wasmBytes);
+ 
+-        const execScript = document.createElement('script');
+-        if (wasmString.includes("tinygo_launch")) {
+-            console.log("TinyGo WASM detected");
+-            execScript.textContent = wasmExecTinygo;
+-        } else {
+-            console.log("Go WASM detected");
+-            execScript.textContent = wasmExecGo;
+-        }
+-        document.head.appendChild(execScript);
++        const name = wasmString.includes("tinygo_launch") ? "wasm_exec.tinygo.js" : "wasm_exec.go.js";
++        await new Promise((resolve, reject) => {
++            const script = document.createElement('script');
++            script.src = window.apptron.runtimeURL + name;
++            script.integrity = window.apptron.runtimeIntegrity[script.src];
++            script.onload = resolve;
++            script.onerror = () => reject(new Error('Could not load verified Go runtime support.'));
++            document.head.appendChild(script);
++        });
+ 
+         const go = new window.Go();
+         WebAssembly.instantiate(wasmBytes, go.importObject).then(obj => {
+--- a/vm/v86/v86.go
++++ b/vm/v86/v86.go
+@@ -185,7 +185,7 @@
+ 		log.Println("starting in-process")
+ 		readySender = readyChannel.Get("port1")
+ 		readyReceiver = readyChannel.Get("port1")
+-		jsutil.LoadScript(url.String(), false)
++		jsutil.LoadScript(js.Global().Get("apptron").Get("runtimeURL").String()+"v86-page.js", false)
+ 	}
+ 
+ 	ready := make(chan js.Value)
+--- a/web/dom/element.go
++++ b/web/dom/element.go
+@@ -136,7 +136,19 @@
+ 					if len(kv) != 2 {
+ 						continue
+ 					}
+-					r.value.Call("setAttribute", kv[0], strings.Trim(kv[1], "'"))
++					// Validate every line before changing the DOM. Never permit URLs,
++					// event handlers, inline styles, or attributes that load resources.
++					switch kv[0] {
++					case "class", "title", "role", "aria-label":
++					default:
++						return fs.ErrPermission
++					}
++				}
++				for _, line := range lines {
++					kv := strings.SplitN(line, "=", 2)
++					if len(kv) == 2 {
++						r.value.Call("setAttribute", kv[0], strings.Trim(kv[1], "'"))
++					}
+ 				}
+ 				return nil
+ 			},
+--- a/web/dom/service.go
++++ b/web/dom/service.go
+@@ -5,7 +5,6 @@
+ import (
+ 	"context"
+ 	"strconv"
+-	"strings"
+ 	"syscall/js"
+ 
+ 	"tractor.dev/wanix"
+@@ -28,7 +27,7 @@
+ 		nextID:    0,
+ 		k:         k,
+ 	}
+-	for _, tag := range []string{"div", "iframe", "xterm", "script"} {
++	for _, tag := range []string{"div", "xterm"} {
+ 		d.Register(tag, func(args []string) (fs.FS, error) {
+ 			return nil, nil
+ 		})
+@@ -146,10 +145,8 @@
+ 					if len(n.Data()) == 0 {
+ 						return nil
+ 					}
+-					el := js.Global().Get("document").Call("createElement", "style")
+-					el.Set("innerText", strings.TrimSpace(string(n.Data())))
+-					js.Global().Get("document").Get("body").Call("appendChild", el)
+-					return nil
++					// Guest CSS can fetch URLs and spoof the frame. Host styles stay available.
++					return fs.ErrPermission
+ 				},
+ 			}, nil
+ 		}),
+--- a/web/dom/xterm/embed.go
++++ b/web/dom/xterm/embed.go
+@@ -33,26 +33,11 @@
+ 
+ func Load() {
+ 	once.Do(func() {
+-		xtermCSS, err := assetBlob("xterm-5.3.0.min.css", "text/css")
+-		if err != nil {
+-			panic(err)
+-		}
+-		jsutil.LoadStylesheet(js.Global().Get("URL").Call("createObjectURL", xtermCSS).String())
+-
+-		fitJS, err := assetBlob("xterm-fit-0.8.0.min.js", "text/javascript")
+-		if err != nil {
+-			panic(err)
+-		}
+-		jsutil.LoadScript(js.Global().Get("URL").Call("createObjectURL", fitJS).String(), false)
+-
+-		xtermJS, err := assetBlob("xterm-5.3.0.min.js", "text/javascript")
+-		if err != nil {
+-			panic(err)
+-		}
+-		promise := jsutil.LoadScript(js.Global().Get("URL").Call("createObjectURL", xtermJS).String(), false)
+-		_, err = jsutil.AwaitErr(promise)
+-		if err != nil {
+-			panic(err)
+-		}
++		base := js.Global().Get("apptron").Get("runtimeURL").String()
++		jsutil.LoadStylesheet(base + "xterm-5.3.0.min.css")
++		_, err := jsutil.AwaitErr(jsutil.LoadScript(base + "xterm-fit-0.8.0.min.js", false))
++		if err != nil { panic(err) }
++		_, err = jsutil.AwaitErr(jsutil.LoadScript(base + "xterm-5.3.0.min.js", false))
++		if err != nil { panic(err) }
+ 	})
+ }
+--- a/web/idbfs/idbfs.go
++++ b/web/idbfs/idbfs.go
+@@ -31,7 +31,7 @@
+ 	if !v.IsUndefined() {
+ 		return
+ 	}
+-	p := jsutil.LoadScript(BlobURL(), true)
++	p := jsutil.LoadScript(js.Global().Get("apptron").Get("runtimeURL").String()+"idbfs.js", true)
+ 	_, err := jsutil.AwaitErr(p)
+ 	if err != nil {
+ 		panic(err)
+--- a/web/jsutil/load.go
++++ b/web/jsutil/load.go
+@@ -12,6 +12,7 @@
+ 	link.Set("href", url)
+ 	link.Set("rel", "stylesheet")
+ 	link.Set("type", "text/css")
++	link.Set("integrity", js.Global().Get("apptron").Get("runtimeIntegrity").Get(url))
+ 	doc.Get("head").Call("appendChild", link)
+ }
+ 
+@@ -23,6 +24,7 @@
+ 		doc := js.Global().Get("document")
+ 		script := doc.Call("createElement", "script")
+ 		script.Set("src", url)
++		script.Set("integrity", js.Global().Get("apptron").Get("runtimeIntegrity").Get(url))
+ 		if module {
+ 			script.Set("type", "module")
+ 		}
+--- a/web/web.go
++++ b/web/web.go
+@@ -5,7 +5,6 @@
+ import (
+ 	"context"
+ 	"fmt"
+-	"log"
+ 	"strings"
+ 	"syscall/js"
+ 
+@@ -13,15 +12,11 @@
+ 	"tractor.dev/wanix/cap"
+ 	"tractor.dev/wanix/fs"
+ 	"tractor.dev/wanix/fs/fskit"
+-	gojsworker "tractor.dev/wanix/runtime/gojs/worker"
+ 	wasiworker "tractor.dev/wanix/runtime/wasi/worker"
+ 	"tractor.dev/wanix/task"
+ 	"tractor.dev/wanix/vfs/pipe"
+ 	"tractor.dev/wanix/vm"
+-	"tractor.dev/wanix/web/caches"
+-	"tractor.dev/wanix/web/dl"
+ 	"tractor.dev/wanix/web/dom"
+-	"tractor.dev/wanix/web/fsa"
+ 	"tractor.dev/wanix/web/runtime"
+ 	"tractor.dev/wanix/web/sw"
+ 	"tractor.dev/wanix/web/worker"
+@@ -29,30 +24,23 @@
+ 
+ func New(k *wanix.K) fskit.MapFS {
+ 	workerfs := worker.New(k.Root)
+-	opfs, _ := fsa.OPFS()
+ 	webfs := fskit.MapFS{
+ 		"dom":    dom.New(k),
+ 		"vm":     vm.New(),
+-		"caches": caches.New(),
+-		"worker": workerfs,
+-		"opfs":   opfs,
+-		"dl":     dl.New(),
+ 	}
+ 	if !runtime.Instance().Get("_sw").IsUndefined() {
+ 		webfs["sw"] = sw.Activate(runtime.Instance().Get("_sw"), k)
+ 		webfs["sw"] = sw.Activate(runtime.Instance().Get("_sw"), k)
+ 	}
+ 
+-	k.Cap.Register("pickerfs", func(_ *cap.Resource) (cap.Mounter, error) {
+-		return func(_ []string) (fs.FS, error) {
+-			return fsa.ShowDirectoryPicker(), nil
+-		}, nil
+-	})
+-
+ 	k.Cap.Register("ws", func(r *cap.Resource) (cap.Mounter, error) {
+ 		return func(args []string) (fs.FS, error) {
+ 			if len(args) == 0 {
+ 				return nil, fmt.Errorf("ws: no url provided")
++			}
++			relay := runtime.Instance().Get("config").Get("network")
++			if relay.IsUndefined() || relay.String() == "" || args[0] != relay.String() {
++				return nil, fs.ErrPermission
+ 			}
+ 			ws := js.Global().Get("WebSocket").New(args[0])
+ 			ws.Set("binaryType", "arraybuffer")
+@@ -86,16 +74,6 @@
+ 		return w.Start(args...)
+ 	})
+ 
+-	k.Task.Register("gojs", func(p *task.Resource) error {
+-		w, err := workerfs.Alloc(p)
+-		if err != nil {
+-			return err
+-		}
+-		url := gojsworker.BlobURL()
+-		args := append([]string{fmt.Sprintf("pid=%s", p.ID()), url}, strings.Split(p.Cmd(), " ")...)
+-		log.Println("gojs task started")
+-		return w.Start(args...)
+-	})
+ 	return webfs
+ }
+ 
+--- a/runtime/wasi/worker/embed.go
++++ b/runtime/wasi/worker/embed.go
+@@ -4,8 +4,6 @@
+ 
+ import (
+ 	"embed"
+-	"encoding/base64"
+-	"fmt"
+ 	"io/fs"
+ 	"strings"
+ 	"syscall/js"
+@@ -15,15 +13,11 @@
+ var Dir embed.FS
+ 
+ func BlobURL() string {
+-	lib, err := fs.ReadFile(Dir, "lib.js")
+-	if err != nil {
+-		panic(err)
+-	}
+ 	worker, err := fs.ReadFile(Dir, "worker.js")
+ 	if err != nil {
+ 		panic(err)
+ 	}
+-	libImport := fmt.Sprintf("data:text/javascript;base64,%s", base64.StdEncoding.EncodeToString(lib))
++	libImport := js.Global().Get("apptron").Get("runtimeURL").String()+"wasi/lib.js"
+ 	workerSrc := strings.Replace(string(worker), "./lib.js", libImport, 1)
+ 	blob := js.Global().Get("Blob").New(js.ValueOf([]any{workerSrc}), js.ValueOf(map[string]any{"type": "text/javascript"}))
+ 	url := js.Global().Get("URL").Call("createObjectURL", blob)
+--- a/web/idbfs/idbfs.js
++++ b/web/idbfs/idbfs.js
+@@ -569,9 +569,10 @@
+         }
+ 
+         if (meta.type === 'symlink') {
+-            const target = new TextDecoder().decode(meta.data);
+-            const resolvedPath = this._normalizePath(target);
+-            return this._resolveSymlink(resolvedPath, visited);
++            // Never resolve a guest link against the backing database root.
++            // Linux resolves readlink targets in its own namespace. Direct
++            // Wanix/WASI opens must fail rather than bypass a scoped mount.
++            throw new IDBFSError('Resolve symlinks in the guest namespace', 'EACCES');
+         }
+ 
+         return meta;

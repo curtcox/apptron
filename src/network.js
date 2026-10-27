@@ -1,4 +1,6 @@
 const key = 'apptron:relay';
+// A session grant is never restored from persistent origin storage.
+let approvedRelay = '';
 export function validateRelay(value, protocol = location.protocol) {
   const text = value.trim(); if (!text) return '';
   let url; try { url = new URL(text); } catch { throw new Error('Enter a ws:// or wss:// relay URL.'); }
@@ -10,5 +12,13 @@ export function getRelay() { try { return localStorage.getItem(key) || ''; } cat
 export function setRelay(value) {
   const relay = validateRelay(value);
   try { if (relay) localStorage.setItem(key, relay); else localStorage.removeItem(key); } catch { throw new Error('Browser storage is unavailable.'); }
+  approvedRelay = relay;
+  return relay;
+}
+
+export function approveRelay(confirmChange) {
+  const relay = validateRelay(getRelay());
+  if (relay !== approvedRelay && relay && !confirmChange(relay)) throw new Error('Network permission declined. VM was not started.');
+  approvedRelay = relay;
   return relay;
 }
