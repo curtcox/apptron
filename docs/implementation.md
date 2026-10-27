@@ -26,6 +26,45 @@ spikes, rather than assumptions about the upstream API:
 - Home is scoped to both the browser and snapshot identity to prevent files
   leaking between snapshots. Runtime upgrades receive isolated identities.
 
+## Security findings
+
+### DOM-bridge sandbox escape (confirmed 2026-10-27, open)
+
+A shared snapshot can run arbitrary JavaScript in the site's own origin. This was
+confirmed with a local spike against the locked runtime
+(`c4cb2dba…`) and the isolation-header server. It is tracked as Phase 0.1 in
+`gallery-plan.md` and must be fixed before the gallery grows, because it already
+affects every share link, gallery load and HashBin load today.
+
+- The guest VM can reach the whole Wanix namespace, including `/web/dom`. From
+  the shell, `cat /web/dom/new/script` creates a real `document.createElement`
+  element in the VM frame (`vm.html`), and `echo "append-child <id>" >> /web/dom/body/ctl`
+  appends it to that frame's body. The frame is same-origin with the editor and
+  carries no `sandbox` attribute (`src/apptron-host.js`).
+- Element attributes are set by writing the element's `attrs` file. Truncating
+  writes (`>`) do not reach the upstream `FieldFile`/`FuncFile` close handler over
+  9p and silently do nothing, but **append writes (`>>`) do**. So a snapshot sets
+  `src='data:text/javascript,…'` on a `<script>` with `>>`, appends it with `>>`,
+  and the browser runs that code in the site origin.
+- Confirmed effect: the injected script set a flag on `window.top` (the editor
+  page, not just the VM frame) and that window's `localStorage` — where HashBin
+  OAuth tokens live under `apptron:oauth:*` — was readable from the injected
+  context. The code runs in the real browser page, which has network access, so
+  "no VM network by default" does not contain it.
+- `envrc` is sourced automatically at session start (`system/bin/start`), so the
+  payload needs only that the visitor open a shared/gallery/HashBin snapshot and
+  click Run.
+- An `<iframe srcdoc>` variant did not execute in the spike (COOP/COEP appears to
+  block it), but the `<script src="data:">` vector is sufficient. The truncate-vs-append
+  behavior is a 9p quirk, not a security control, so it must not be relied on.
+
+Planned mitigation (Phase 0.1 in `gallery-plan.md`): a `patches/` change that
+limits the DOM element types the guest can create to `div` and `xterm` and
+allowlists attributes (no `src`/`srcdoc`/`href`, no `on*`, no `javascript:`/`data:`
+URLs), with a boot test that the bypass fails; longer term, serve the VM frame
+from a separate origin. The spike scripts live outside the repo (session
+scratchpad) and are not committed.
+
 ## Implemented
 
 The editor, VM host, subpath-safe service worker, snapshot parser/capture,
