@@ -101,8 +101,28 @@ containment patch below is therefore required, not optional. Steps:
    VM can create to `div` and `xterm`. The patch also allowlists attributes:
    no `src`, `srcdoc` or `href`, no `on*` handlers, and no `javascript:` or
    `data:` URLs. Add a boot test that the bypass fails.
-3. Longer term, consider serving the VM frame from a separate origin. That
+3. Spike the sandboxed-iframe option (`docs/security.md` B1): does the data
+   service worker still add COEP to a `sandbox="allow-scripts"` frame, and do
+   `SharedArrayBuffer`, OPFS and IndexedDB work there? The answer decides
+   between a sandboxed frame and a separate origin.
+4. Spike, then fix, cross-snapshot storage (`docs/security.md` W1, A3): the
+   guest can see the whole `apptron-rev1` IndexedDB at `/web/idbfs/apptron`,
+   including other snapshots' homes, projects and custom roots. Patch it so a
+   VM sees only its own snapshot's trees, and add a boot test.
+5. Add a meta CSP to `vm.html` with a path-scoped `script-src` (no `data:`, not
+   plain `'self'`), and make the service worker add
+   `X-Content-Type-Options: nosniff` and `Content-Security-Policy: sandbox` to
+   `data/` responses (`docs/security.md` C2).
+6. Check overlay tars like txtar: reject `..`, absolute and `./`-prefixed
+   paths, and verify HashBin overlays against their CID (`docs/security.md`
+   W3).
+7. Ask before a share link or HashBin load replaces an unsaved draft
+   (`docs/security.md` W4).
+8. Longer term, consider serving the VM frame from a separate origin. That
    needs a host other than `curtcox.github.io`, so it is the owner's decision.
+
+The acceptance tests for these steps are T1, T3, T4, T5, T7 and the draft half
+of T8 in `docs/security.md`.
 
 Examples that use `/web/dom` (B3 below) wait on this, and they use only what
 survives the patch.
@@ -260,7 +280,7 @@ Examples that teach Apptron Online's own features.
 
 ## Order of work
 
-1. **Phase 0.1** spike and, if needed, the containment patch.
+1. **Phase 0.1**: the containment patch, storage scoping, the `vm.html` CSP, overlay checks and the isolation spike.
 2. **Phase 0.2** data model, parametrized gallery boot spec, probe script.
 3. **Wave 1: zero-download and existing overlays.** inside-linux, my-binfmt,
    git-offline, unix-data, shell-adventure, life-in-awk, what-persists,
