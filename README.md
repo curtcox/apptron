@@ -39,7 +39,7 @@ node scripts/runtime-manifest.mjs runtime/$(git -C upstream/apptron rev-parse HE
 - Capture project files, download snapshots, capture and restore disk overlays.
 - Offline package overlays for Python, C/Make, Node and terminal toys; lazy Go bundles.
 - Compressed links, optional is.gd shortening, QR preview and PNG download.
-- HashBin loading and OAuth saves with price confirmation and stale-load guards.
+- HashBin loading, and saves approved with their price on hashbin.org (HashBin Publish), with stale-load guards.
 - Searchable nine-example gallery, documentation, responsive Code/Preview toggle,
   virtual keyboard refitting, and terminal key bar.
 - Node tests, browser checks in Chromium/Firefox/WebKit at desktop and phone sizes,
@@ -124,5 +124,6 @@ licenses in `vendor/`. Apptron and runtime dependencies retain their own license
 The VM-origin split is prepared but disabled by default. See
 [deployment instructions](docs/deployment.md) for the two artifact builds,
 origin pins and first-response headers. The VM host must support those headers;
-the editor may stay on Pages. A credential vault cannot share the VM origin and
-is still separate work.
+the editor may stay on Pages. HashBin saves use HashBin Publish, so no origin holds
+HashBin credentials. Relay permissions bind to exact source, runtime and destination;
+Network can revoke them immediately.

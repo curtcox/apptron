@@ -1,7 +1,9 @@
 import { deployment } from './deployment.js';
 import { sha256 } from './runtime-integrity.js';
 export { sha256 } from './runtime-integrity.js';
-import { validateRelay } from './network.js';
+import { NetworkGrants } from './network.js';
+import { readLimited } from './read-limited.js';
+export { readLimited } from './read-limited.js';
 import { validMessage, validSession } from './bridge.js';
 import { isCID, cidLength, verifyCID } from './content-id.js';
 import { parseSnapshot, snapshotUUID } from './snapshot.js';
@@ -30,18 +32,25 @@ export async function dataGrant(message) {
   });
 }
 export class ApptronHost {
-  constructor(container, status = () => {}) { this.container = container; this.status = status; this.generation = 0; }
+  constructor(container, status = () => {}) { this.container = container; this.status = status; this.generation = 0; this.networkGrants = new NetworkGrants(); }
+  async approveNetwork(source, relay, confirm) {
+    parseSnapshot(source);
+    const lock = await this.config();
+    return this.networkGrants.request(source, lock.commit, relay, confirm);
+  }
+  revokeNetwork() { this.networkGrants.revoke(); this.stop(); }
   async config() {
     if (this.lock) return this.lock;
     const response = await fetch(new URL('../runtime.lock', import.meta.url));
     if (!response.ok) throw new Error('runtime.lock is missing.');
     return this.lock = await response.json();
   }
-  async run(source, { allowMismatch = async () => false, relay = '' } = {}) {
+  async run(source, { allowMismatch = async () => false, networkGrant = null, relay = '' } = {}) {
     if (!document.querySelector('meta[data-apptron-policy]')) throw new Error('Security policy did not load. Reload before Run.');
-    relay = validateRelay(relay);
+    if (relay) throw new Error('Network access needs a snapshot grant.');
     this.stop(); const generation = this.generation;
     const snapshot = parseSnapshot(source); const lock = await this.config();
+    relay = this.networkGrants.resolve(networkGrant, source, lock.commit);
     await ensureServiceWorker();
     const uuid = await snapshotUUID(source, lock.commit);
     let browserId; try { const stored = localStorage.getItem('apptron:browser-id'); browserId = validSession(stored) ? stored : crypto.randomUUID(); localStorage.setItem('apptron:browser-id', browserId); } catch { browserId = 'guest'; }
@@ -73,9 +82,11 @@ export class ApptronHost {
     }
     if (generation !== this.generation) return;
     Object.assign(this, { uuid, user, source, snapshot, manifest });
-    return this.startFrame({ uuid, user, source, manifest, relay, overlayData });
+    return this.startFrame({ uuid, user, source, manifest, networkGrant, overlayData });
   }
-  async startFrame({ uuid, user, source, manifest, relay = '', overlayData, action = 'run' }) {
+  async startFrame({ uuid, user, source, manifest, networkGrant = null, relay = '', overlayData, action = 'run' }) {
+    if (relay) throw new Error('Network access needs a snapshot grant.');
+    relay = this.networkGrants.resolve(networkGrant, source, manifest.commit);
     const generation = this.generation, settings = deployment();
     let session = crypto.randomUUID(); this.session = session; this.requests = new Map(); this.nextRequest = 0;
     const frame = document.createElement('iframe');
@@ -92,10 +103,14 @@ export class ApptronHost {
       let timeout;
       const armTimeout = () => { clearTimeout(timeout); timeout = setTimeout(() => {
         const error = new Error('VM boot timed out. Try Reset VM, then Run again.');
-        this.running = false; this.status(error.message); cleanup(); if (!settled) reject(error);
+        fail(error);
       }, 180000); };
       armTimeout();
       const cleanup = () => { clearTimeout(timeout); window.removeEventListener('message', onMessage); };
+      const fail = error => {
+        cleanup(); this.cancelBoot = null; this.stop(); this.status(error.message);
+        if (!settled) { settled = true; reject(error); }
+      };
       const onMessage = event => {
         if (generation !== this.generation || this.frame !== frame) return;
         if (event.source !== frame.contentWindow || event.origin !== this.frameOrigin || !validMessage(event.data, session)) return;
@@ -118,7 +133,7 @@ export class ApptronHost {
           if (!settled) { settled = true; resolve(); }
         }
         if (event.data.type === 'apptron-error') {
-          this.running = false; this.status(event.data.message.slice(0, 1000)); cleanup(); if (!settled) reject(new Error(event.data.message));
+          fail(new Error(event.data.message.slice(0, 1000)));
         }
       };
       window.addEventListener('message', onMessage);
@@ -170,11 +185,4 @@ export class ApptronHost {
     finally { this.stop(); }
   }
   stop() { if (this.session) { this.frame?.contentWindow?.postMessage({ type: 'apptron-stop', session: this.session }, this.frameOrigin); this.session = null; } this.generation++; this.running = false; this.cancelBoot?.(); this.cancelBoot = null; for (const pending of this.requests?.values() || []) pending.reject(new Error('VM stopped.')); this.requests?.clear(); this.frame?.remove(); this.frame = null; }
-}
-export async function readLimited(response, limit, progress = () => {}) {
-  if (Number(response.headers.get('Content-Length')) > limit) throw new Error('Download exceeds its size limit.');
-  const reader = response.body.getReader(); const chunks = []; let size = 0;
-  try { while (true) { const { value, done } = await reader.read(); if (done) break; size += value.length; if (size > limit) throw new Error('Download exceeds its size limit.'); chunks.push(value); progress(size); } }
-  finally { await reader.cancel(); }
-  const data = new Uint8Array(size); let at = 0; for (const chunk of chunks) { data.set(chunk, at); at += chunk.length; } return data;
 }

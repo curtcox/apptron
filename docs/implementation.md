@@ -75,8 +75,9 @@ The B1 spike in `tests/browser/isolation-spike.spec.cjs` rules out an opaque
 origin for this runtime: no IndexedDB or OPFS in the tested engines, and no
 SharedArrayBuffer in Chromium. B2 is prepared with configurable, pinned origins and a storage/capture/reset
 bridge, validated against a real VM on a second local origin. Production hosting
-is not activated; see `deployment.md` for artifact builds and required headers. The token vault and
-capability broker are still pending. Same-origin frame execution remains unsafe;
+is not activated; see `deployment.md` for artifact builds and required headers. HashBin saves use
+HashBin Publish, so no token vault is needed. Snapshot-specific relay grants are implemented; picker/download
+brokers are still pending. Same-origin frame execution remains unsafe;
 full DOM and Go/JS access must stay closed. See `security.md`'s implementation
 status for the remaining architecture and its storage-isolation caveat.
 
@@ -92,7 +93,8 @@ script. Large runtime files are ignored.
 ## Verification
 
 - 29 Node tests pass for txtar, limits, UUIDs, r2fs, tar/gzip, overlay storage,
-  sharing, HashBin documents and OAuth restoration, QR limits and relay URLs.
+  sharing, HashBin documents, Publish popup/redirect saves and restoration, QR limits, relay URLs
+  and snapshot-specific network grants.
 - Editor browser checks cover Chromium, Firefox and WebKit at desktop and phone
   sizes, plus hostile-input/CSP/consent checks and the opaque-origin spike
   (70 pass, two Firefox service-worker cases skipped). Firefox cannot evaluate
@@ -124,8 +126,8 @@ HashBin integration was left unchanged during deployment work.
 ## External setup and limits
 
 HashBin registration is intentionally left to the owner: the meta client ID is
-empty and save controls explain what is missing. OAuth restoration and saving
-are tested with stubs; no real account was charged. Live is.gd availability is
+empty and save controls explain what is missing. Register the editor's exact return URL
+when adding one. HashBin Publish saves are tested with SDK stubs; no real account was charged. Live is.gd availability is
 not required by tests. The owner has requested publication to GitHub Pages. Deployment is controlled
 by `APPTRON_DEPLOY_ENABLED`, and Pages is configured to use GitHub Actions.
 CI runners are pinned to Ubuntu 24.04, which supports the pinned Playwright

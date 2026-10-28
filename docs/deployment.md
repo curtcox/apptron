@@ -93,11 +93,10 @@ on one shared VM origin would still reach other snapshots in that origin's
 IndexedDB. Do not lift those restrictions before per-snapshot storage brokering
 and capability consent are implemented.
 
-A credential vault must use an origin separate from **both** editor and VM. It
-is not implemented by this VM split. `authURL` is reserved and rejects nonempty
-configuration, including a vault cohosted on either existing origin. OAuth
-registration and the vault's own consent/storage flow remain separate work;
-existing HashBin quote-and-confirm remains in the editor.
+No credential vault is needed: HashBin saves are approved on hashbin.org through
+HashBin Publish, so neither editor nor VM holds a HashBin credential. `authURL`
+is retired and rejects nonempty configuration. A HashBin registration for the
+editor needs its exact return URL (for Pages, `https://curtcox.github.io/apptron/`).
 
 ## Local verification
 

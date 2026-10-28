@@ -7,7 +7,7 @@ import { ShareLinks, ShareClient, readShareURL } from './share-links.js';
 import { HashBinDocuments, HashBinStore } from './hashbin.js';
 import { HashBinPanel } from './hashbin-panel.js';
 import { renderQR } from './qr-panel.js';
-import { getRelay, setRelay, approveRelay } from './network.js';
+import { getRelay, setRelay } from './network.js';
 import { loadExample } from './examples.js';
 import { setupKeybar } from './keybar.js';
 import { installTxtarMode } from './txtar-mode.js';
@@ -64,14 +64,15 @@ setupKeybar($('keybar'), host);
 $('show-code').onclick = () => view('code'); $('show-preview').onclick = () => view('preview');
 $('run').onclick = async () => {
   if ($('run').disabled) return;
-  const text = source();
+  const text = source(), version = revision;
   try {
     parseSnapshot(text);
-    const relay = approveRelay(value => confirm(`Allow this snapshot to use the network through ${value}? This relay was not approved in this session. It can reach services on your network. Clear it in Network to stay offline.`));
+    const networkGrant = await host.approveNetwork(text, getRelay(), value => confirm(`Allow this snapshot to use the network through ${value}? It can reach services on your network. Permission is for this exact snapshot and runtime in this tab. Use Network to revoke access.`));
+    if (revision !== version) throw new Error('Snapshot changed while permissions were checked. Press Run again.');
     networkLabel();
     $('run').disabled = true; $('run').textContent = 'Booting…'; $('vm-dot').classList.add('muted');
     if (matchMedia('(max-width:760px)').matches) view('preview');
-    await host.run(text, { relay, allowMismatch: commit => confirm(`This overlay was made for runtime ${commit.slice(0, 7)}. It may not work with this runtime. Load it anyway?`) });
+    await host.run(text, { networkGrant, allowMismatch: commit => confirm(`This overlay was made for runtime ${commit.slice(0, 7)}. It may not work with this runtime. Load it anyway?`) });
     if (host.running) { $('vm-dot').classList.remove('muted'); dirty = false; }
   } catch (error) { status(error.message); }
   finally { $('run').disabled = false; $('run').innerHTML = '<span aria-hidden="true">▶</span> Run'; }
@@ -126,12 +127,13 @@ $('qr').onclick = () => {
 $('qr-hashbin').onclick = () => { $('qr-dialog').close(); panel.openSave(); };
 $('hashbin-open').onclick = () => $('hashbin-load-dialog').showModal();
 const networkLabel = () => { const relay = getRelay(); $('network-state').textContent = relay ? `◉ Relay configured: ${relay}` : '○ No VM network'; $('run').title = relay ? `Run with relay ${relay}` : 'Run without VM network'; };
-window.addEventListener('storage', event => { if (event.key === 'apptron:relay' || event.key === null) networkLabel(); });
+window.addEventListener('storage', event => { if (event.key === 'apptron:relay' || event.key === null) { host.revokeNetwork(); $('vm-dot').classList.add('muted'); networkLabel(); status('Network setting changed in another tab. VM stopped; press Run to review access.'); } });
 $('network-open').onclick = () => { $('relay-url').value = getRelay(); $('network-message').textContent = ''; $('network-dialog').showModal(); };
 $('network-save').onclick = () => {
-  try { setRelay($('relay-url').value); host.stop(); $('vm-dot').classList.add('muted'); networkLabel(); $('network-dialog').close(); status('Network setting saved. VM stopped; press Run to apply it.'); }
+  try { setRelay($('relay-url').value); host.revokeNetwork(); $('vm-dot').classList.add('muted'); networkLabel(); $('network-dialog').close(); status('Network setting saved. VM stopped; press Run to apply it.'); }
   catch (error) { $('network-message').textContent = error.message; }
 };
+$('network-revoke').onclick = () => { host.revokeNetwork(); $('vm-dot').classList.add('muted'); $('network-dialog').close(); status('Network grants revoked. VM stopped; the next networked Run needs approval.'); };
 $('dismiss-notice').onclick = () => { $('network-notice').hidden = true; try { local.setItem('network-notice-dismissed', '1'); } catch { /* Optional preference. */ } };
 $('network-notice').hidden = local.getItem('network-notice-dismissed') === '1'; networkLabel();
 function download(data, type, name) {
@@ -166,11 +168,14 @@ async function initialize() {
   // A persisted draft may hold unsaved work even after a reload.
   dirty = !!draft;
   try {
-    const callback = await store.callback(location.search);
-    if (callback) {
-      if (callback.snapshot?.src && callback.snapshot.src !== source()) replaceSource(callback.snapshot.src, provenance('stored'));
-      const url = new URL(location.href); for (const key of ['code', 'state', 'error', 'error_description']) url.searchParams.delete(key); history.replaceState(null, '', url);
-      status(callback.error || 'Connected to HashBin. Choose Save to review the price.');
+    store.retireLegacyTokens().catch(() => { /* Retried on the next load. */ });
+    // A redirect save returns here with its snapshot, approved or cancelled.
+    const published = await store.published(location.hash);
+    if (published) {
+      history.replaceState(null, '', location.pathname + location.search);
+      if (published.snapshot?.src && published.snapshot.src !== source()) replaceSource(published.snapshot.src, provenance('stored'));
+      if (published.cid) panel.saved(published.cid, source(), published.overlay);
+      if (published.error || !published.overlay) status(published.error || 'Saved to HashBin.');
     } else {
       const cid = HashBinDocuments.cid(location.hash);
       const example = new URL(location.href).searchParams.get('example');

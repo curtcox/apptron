@@ -23,7 +23,7 @@ export function validateDeployment(value = {}, pageURL) {
   if (vm.protocol === 'http:' && !loopback(new URL(editorOrigin).hostname)) throw new Error('HTTP VM URLs are only supported with a loopback editor.');
   const auth = value.authURL ? deploymentURL(value.authURL, 'Credential broker URL') : null;
   if (auth && [editorOrigin, vm.origin].includes(auth.origin)) throw new Error('The credential broker must have its own origin, separate from editor and VM.');
-  if (auth) throw new Error('The credential vault is not implemented yet; leave authURL empty.');
+  if (auth) throw new Error('The credential vault was retired: HashBin Publish keeps credentials off this origin. Leave authURL empty.');
   return { role, vmURL: vm.href, editorOrigin, authURL: auth?.href || '', isolated: role === 'vm' || vm.origin !== page.origin };
 }
 export function deployment() {

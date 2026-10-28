@@ -1,5 +1,5 @@
-import { HashBinDocuments } from './hashbin.js';
-/** HashBin controls: snapshot saves, quote before charging, and stale-load guards. */
+import { HashBinDocuments, REDIRECT_BYTES } from './hashbin.js';
+/** HashBin controls: snapshot and overlay saves approved on hashbin.org, and stale-load guards. */
 class HashBinPanel {
   constructor({ store, getSnapshot, getFingerprint, onLoad, onSaved }) {
     Object.assign(this, { store, getSnapshot, getFingerprint, onLoad, onSaved });
@@ -8,18 +8,12 @@ class HashBinPanel {
     this.dialog = document.getElementById('hashbin-dialog');
     this.message = document.getElementById('hashbin-message');
     this.confirm = document.getElementById('hashbin-confirm');
-    this.disconnect = document.getElementById('hashbin-disconnect');
     document.getElementById('hashbin-load').onclick = () => this.load(document.getElementById('hashbin-cid').value);
     document.getElementById('hashbin-cid').onkeydown = event => { if (event.key === 'Enter') this.load(event.target.value); };
     document.getElementById('hashbin-save').onclick = () => this.openSave();
     document.getElementById('hashbin-close').onclick = () => this.dialog.close();
     this.dialog.addEventListener('close', () => { this.dialogRevision = (this.dialogRevision || 0) + 1; });
     this.confirm.onclick = () => this.commit();
-    this.disconnect.onclick = () => {
-      this.store.oauth?.clearTokens();
-      this.status.textContent = 'Disconnected from HashBin.';
-      this.dialog.close();
-    };
   }
   cancelLoad() {
     this.revision++;
@@ -41,53 +35,41 @@ class HashBinPanel {
     if (this.saving) return;
     const revision = this.dialogRevision = (this.dialogRevision || 0) + 1;
     this.confirm.disabled = true;
-    this.disconnect.hidden = true;
-    this.confirm.textContent = 'Save';
+    this.confirm.textContent = 'Review on HashBin';
     this.message.textContent = 'Preparing save…';
-    this.dialog.showModal();
+    if (!this.dialog.open) this.dialog.showModal();
     try {
       this.snapshot = this.getSnapshot();
       this.overlay = overlay;
       this.payload = overlay || HashBinDocuments.serialize(this.snapshot);
       this.fingerprint = this.getFingerprint();
-      this.connecting = !(await this.store.connected());
-      if (revision !== this.dialogRevision) return;
-      if (this.connecting) {
-        this.message.textContent = 'Connect your HashBin account to save. Sign-in returns to this editor with your source intact. Saves use your account balance and retention settings.';
-        this.confirm.textContent = 'Connect to HashBin';
-      } else {
-        this.disconnect.hidden = false;
-        const quote = await this.store.quote(this.payload);
-        if (revision !== this.dialogRevision) return;
-        const dollars = n => `$${(n / 100).toFixed(2)}`;
-        this.message.textContent = `${quote.size} bytes · Kept for ${quote.months} month(s)\nCost: ${dollars(quote.cost)} · Balance: ${dollars(quote.balance)}`;
-        if (quote.cost > quote.balance) throw new Error('Insufficient HashBin balance. Add funds on hashbin.org before saving.');
+      const size = HashBinDocuments.bytes(this.payload).length;
+      if (this.store.redirectOnly && size > REDIRECT_BYTES) {
+        this.message.replaceChildren(`This ${overlay ? 'overlay' : 'snapshot'} is ${size} bytes. From this isolated editor HashBin Publish takes up to ${REDIRECT_BYTES} bytes. Download it, upload it on `);
+        const upload = document.createElement('a');
+        upload.href = 'https://hashbin.org/upload.html'; upload.target = '_blank'; upload.rel = 'noopener'; upload.textContent = 'hashbin.org';
+        this.message.append(upload, overlay ? ', then add its CID as the snapshot’s overlay: header.' : ', then load its CID here.');
+        return;
       }
+      // Load the SDK now: a popup must open synchronously from the next click.
+      await this.store.init();
+      if (revision !== this.dialogRevision) return;
+      this.message.textContent = `${size} bytes. HashBin shows the retention, exact price and your balance, and you approve the save on hashbin.org. This editor never holds your HashBin sign-in.` +
+        (this.store.redirectOnly ? ' The editor goes to HashBin and returns with your snapshot; a running VM stops.' : '');
       this.confirm.disabled = false;
     } catch (error) { if (revision === this.dialogRevision) this.message.textContent = error.message; }
   }
   async commit() {
     if (this.confirm.disabled || this.saving) return;
+    if (this.fingerprint !== this.getFingerprint()) { await this.openSave(this.overlay); return; }
     this.confirm.disabled = true;
     this.saving = true;
     try {
-      if (this.connecting) {
-        // Capture edits made while the connect dialog was open.
-        const snapshot = this.getSnapshot();
-        const url = await this.store.connect(snapshot);
-        location.href = url;
-        return;
-      }
-      if (this.fingerprint !== this.getFingerprint()) {
-        this.saving = false;
-        await this.openSave(this.overlay);
-        return;
-      }
-      this.message.textContent = 'Saving to HashBin…';
-      const result = await this.store.save(this.payload, Boolean(this.overlay));
-      const link = this.overlay ? `https://256t.us/${result.cid}` : HashBinDocuments.link(location.href, result.cid);
-      if (this.fingerprint === this.getFingerprint()) this.onSaved(result.cid, this.fingerprint, link, Boolean(this.overlay));
-      this.status.textContent = 'Saved to HashBin.';
+      const pending = this.store.publish(this.payload, this.snapshot, Boolean(this.overlay));
+      this.message.textContent = 'Waiting for your approval on HashBin…';
+      const result = await pending;
+      if (result.redirected) return;
+      const link = this.saved(result.cid, this.fingerprint, Boolean(this.overlay));
       this.message.replaceChildren(document.createTextNode('Saved. '));
       const a = document.createElement('a');
       a.href = link;
@@ -98,6 +80,13 @@ class HashBinPanel {
       this.message.textContent = error.message;
       this.confirm.disabled = false;
     } finally { this.saving = false; }
+  }
+  /** Records a verified save, unless the source changed while HashBin was open. */
+  saved(cid, fingerprint, overlay) {
+    const link = overlay ? `https://256t.us/${cid}` : HashBinDocuments.link(location.href, cid);
+    if (fingerprint === this.getFingerprint()) this.onSaved(cid, fingerprint, link, overlay);
+    this.status.textContent = 'Saved to HashBin.';
+    return link;
   }
 }
 export { HashBinPanel };

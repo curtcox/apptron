@@ -17,6 +17,6 @@ works at `/apptron/` on GitHub Pages and at any localhost subpath.
   Match the pinned Wanix API: `readDir` returns name strings and `stat`/`lstat`
   return `Mode`, `Size`, `IsDir`, `ModTime` (Go file-mode bits).
 - Do not turn on VM networking by default or put relay settings in share links.
-  Do not remove quote-and-confirm from HashBin saves.
+  HashBin saves are quoted and confirmed on hashbin.org through HashBin Publish (pinned SDK); never reintroduce HashBin tokens on this origin, which runs untrusted VMs. Isolated editors must use the redirect handoff.
 - Publication is controlled by the owner's `APPTRON_DEPLOY_ENABLED` repository
   variable. The owner has requested GitHub Pages deployment in this chat.

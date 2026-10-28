@@ -52,5 +52,33 @@ test('T8 HashBin loads ask before replacing a restored draft and report cancella
 test('unsupported credential-vault configuration disables account actions',async({page})=>{
  const config={role:'editor',vmURL:'',editorOrigin:'',authURL:'https://vault.invalid/auth.html'};
  await page.route('**/deployment-config.js',route=>route.fulfill({contentType:'text/javascript',body:'globalThis.APPTRON_DEPLOYMENT='+JSON.stringify(config)}));
- await page.goto('./');await expect(page.locator('#status')).toContainText('credential vault is not implemented');await expect(page.locator('#hashbin-save')).toBeDisabled();await expect(page.locator('#run')).toBeDisabled();
+ await page.goto('./');await expect(page.locator('#status')).toContainText('credential vault was retired');await expect(page.locator('#hashbin-save')).toBeDisabled();await expect(page.locator('#run')).toBeDisabled();
+});
+
+test('network permission is snapshot scoped even after saving a relay, and revoke stops the VM',async({page})=>{
+ await ready(page);
+ await page.evaluate(()=>{ApptronOnline.host.run=async function(source,{networkGrant}){this.networkGrants.resolve(networkGrant,source,this.lock.commit);this.running=true;this.frame=document.createElement('iframe');document.querySelector('#terminal').replaceChildren(this.frame)}});
+ await page.locator('.more summary').click();await page.locator('#network-open').click();await page.locator('#relay-url').fill('wss://relay.example/x/net');await page.locator('#network-save').click();
+ let prompts=0;page.on('dialog',async dialog=>{prompts++;await dialog.accept()});
+ await page.locator('#run').click();await expect(page.locator('#terminal iframe')).toHaveCount(1);expect(prompts).toBe(1);
+ await page.locator('#run').click();expect(prompts).toBe(1);
+ await page.evaluate(()=>ApptronOnline.editor.setValue(ApptronOnline.getSource()+'# changed\n'));
+ await page.locator('#run').click();expect(prompts).toBe(2);
+ await page.locator('.more summary').click();await page.locator('#network-open').click();await page.locator('#network-revoke').click();
+ await expect(page.locator('#terminal iframe')).toHaveCount(0);await expect(page.locator('#status')).toContainText('grants revoked');
+ await page.locator('#run').click();expect(prompts).toBe(3);
+});
+
+test('a VM error ends the frame and rejects pending operations',async({page})=>{
+ await ready(page);
+ await page.evaluate(async()=>{
+  const host=ApptronOnline.host;host.lock={commit:'a'.repeat(40)};host.generation++;
+  window.failedBoot=host.startFrame({uuid:'a'.repeat(64),user:'test',source:'# apptron snapshot v1\n-- test --\nx\n',manifest:{commit:'a'.repeat(40)}}).catch(error=>error.message);
+  await new Promise(resolve=>host.frame.addEventListener('load',resolve,{once:true}));
+ });
+ await page.evaluate(()=>{const host=ApptronOnline.host;host.running=true;window.pendingCommand=host.command('apptron-resize').catch(error=>error.message)});
+ const frame=page.frames().find(frame=>frame.url().includes('/vm.html'));
+ await frame.evaluate(()=>parent.postMessage({type:'apptron-error',session:parent.ApptronOnline.host.session,message:'fatal'},location.origin));
+ const result=await page.evaluate(async()=>({message:await failedBoot,pending:await pendingCommand,running:ApptronOnline.host.running,frames:document.querySelectorAll('#terminal iframe').length}));
+ expect(result).toEqual({message:'fatal',pending:'VM stopped.',running:false,frames:0});
 });

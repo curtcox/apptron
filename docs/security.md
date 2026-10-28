@@ -49,7 +49,7 @@ architecture:
 - **W3/W4/D3/D4:** overlay paths, ancestors, links and duplicates are checked
   before restore; downloaded HashBin bytes are verified against their CID.
   Incoming loads confirm before replacing a restored or dirty draft; provenance
-  survives edits/reloads. Restored/changed relays require session consent and
+  survives edits/reloads. Relays require snapshot-specific session consent and
   appear beside Run. The snapshot area is labelled; credential and price prompts
   stay in the host.
 - **B3:** keyboard, resize, project/overlay capture and reset use a small bridge with
@@ -72,7 +72,22 @@ headers are documented in [deployment.md](deployment.md). No production VM
 origin has been selected or activated. With no configured URL the existing
 restricted local mode remains; it is not an origin boundary.
 
-**Still pending:** C1's credential vault and A2/D1/D2's capability broker/grant UI.
+**C1 is met without a vault:** saves go through HashBin Publish on hashbin.org,
+which shows the document, retention and price and takes the user's approval, so
+the editor origin holds no HashBin credential to steal. The isolated editor uses
+the redirect handoff (its COOP header severs a popup's opener); documents above
+512 KiB are downloaded and uploaded on hashbin.org. Tokens from any earlier OAuth
+flow are revoked server-side. A third-origin vault was prototyped and retired in
+favour of this (local branch `wip/credential-vault`).
+
+**A2/D1 network grants are implemented:** a relay setting alone grants nothing.
+The host issues memory-only grants for exact source bytes, runtime commit and
+relay, after user approval. Editing source, changing the runtime or selecting a
+new relay needs a new grant. Revocation and cross-tab relay changes stop the VM
+immediately. Offline Runs need no grant. Gallery snapshots receive the same
+conservative policy; no broader D2 tier is enabled.
+
+**Still pending:** D2's broader capability tiers and picker/download brokers.
 Picker, download, raw worker, and Go/JS capabilities stay closed. A1 and CSP
 remain backstops. Do not enable full DOM code execution on a shared VM origin:
 JavaScript can bypass runtime mount scoping and read that origin's other IndexedDB

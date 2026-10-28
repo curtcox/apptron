@@ -99,8 +99,8 @@ containment patch below is therefore required, not optional.
 The current checkout implements the immediate containment, storage scoping, CSP,
 CID/overlay checks, draft/relay consent and bridge groundwork; hostile boot tests
 cover them. The opaque-origin spike fails the runtime's storage requirements
-(and SharedArrayBuffer in Chromium). The B2 VM path is prepared and awaits a hosting origin. The credential vault
-and capability broker remain separate pending work. See `security.md`'s implementation
+(and SharedArrayBuffer in Chromium). The B2 VM path is prepared and awaits a hosting origin. HashBin Publish
+replaced the planned credential vault; snapshot-specific relay grants are implemented and picker/download brokers remain pending. See `security.md`'s implementation
 status before extending browser-reaching examples. The original checklist follows:
 
 
