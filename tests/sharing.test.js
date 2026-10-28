@@ -31,11 +31,11 @@ test('HashBin Publish saves snapshots and gzip overlays with the pinned SDK and 
  assert.equal((await store.publish(payload,{src})).cid,cidOf(payload));assert.equal(calls[0].options.contentType,'application/json');assert.deepEqual(calls[0].options.clientState,{snapshot:{src},overlay:false});
  assert.equal((await store.publish(overlay,{src},true)).cid,cidOf(overlay));assert.equal(calls[1].options.contentType,'application/gzip');assert.deepEqual([...calls[1].bytes],[31,139,8]);
  store.client.publish=async()=>({cid:cidOf(payload+' ')});await assert.rejects(store.publish(payload,{src}),/does not match|CID/);
- assert.match(require('node:fs').readFileSync(new URL('../src/hashbin.js',import.meta.url),'utf8'),/hashbin\.org\/sdk\/v0\.2\.0\/hashbin\.js/);
+ assert.match(require('node:fs').readFileSync(new URL('../src/hashbin.js',import.meta.url),'utf8'),/hashbin\.org\/sdk\/v0\.3\.0\/hashbin\.js/);
 });
 test('isolated editors save through a redirect that restores the snapshot after approval or cancellation',async()=>{
  const transactionStorage=memoryStore(),payload=HashBinDocuments.serialize({src});let mode,outcome='approve';
- const store=new HashBinStore({clientId:'registered',transactionStorage,loadSDK:async()=>({HashBinClient:class{publish(_bytes,options){mode=options.mode;return Promise.resolve({redirected:true});}async handlePublishCallback(){if(outcome!=='approve')throw new Error('access_denied');return {cid:cidOf(payload),clientState:{snapshot:{src},overlay:true}};}}})});
+ const store=new HashBinStore({clientId:'registered',transactionStorage,loadSDK:async()=>({HashBinClient:class{publish(_bytes,options){mode=options.mode;return Promise.resolve({redirected:true});}async handlePublishCallback(){if(outcome!=='approve')throw Object.assign(new Error('access_denied'),{clientState:{snapshot:{src},overlay:true}});return {cid:cidOf(payload),clientState:{snapshot:{src},overlay:true}};}}})});
  await store.init();globalThis.crossOriginIsolated=true;
  try{assert.deepEqual(await store.publish(payload,{src},true),{redirected:true});assert.equal(mode,'redirect');}finally{delete globalThis.crossOriginIsolated;}
  assert.equal(await store.published('#'+cidOf('x')),null);

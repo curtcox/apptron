@@ -45,8 +45,8 @@ const HashBinDocuments = {
 };
 
 /** Pinned so a later SDK change cannot reach this app; upgrade deliberately. */
-const HASHBIN_SDK_URL = 'https://hashbin.org/sdk/v0.2.0/hashbin.js';
-/** The SDK's fragment handoff limit for redirect saves. */
+const HASHBIN_SDK_URL = 'https://hashbin.org/sdk/v0.3.0/hashbin.js';
+/** Above the SDK's fragment limit, a redirect save hands the document over as a downloaded file. */
 const REDIRECT_BYTES = 512 * 1024;
 
 /** Saves go through HashBin Publish, so this origin, which also runs untrusted VMs, never holds a HashBin credential. */
@@ -93,32 +93,26 @@ class HashBinStore {
   /** Call synchronously from a click after init(), so a popup is allowed. A blocked popup redirects. */
   publish(payload, snapshot, overlay = false) {
     if (!this.client) return Promise.reject(new Error('HashBin is still loading. Try again.'));
-    const bytes = HashBinDocuments.bytes(payload), pending = `hashbin:pending-publish:${this.clientId}`;
-    // A redirect cancelled on HashBin comes back without the SDK's clientState; keep a copy to restore.
-    if (bytes.length <= REDIRECT_BYTES) try { this.transactionStorage?.setItem(pending, JSON.stringify({ snapshot, overlay })); } catch { /* Popup saves still work. */ }
-    return this.client.publish(bytes, { mode: this.redirectOnly ? 'redirect' : 'popup', contentType: overlay ? 'application/gzip' : 'application/json', clientState: { snapshot, overlay } }).then(async result => {
+    const bytes = HashBinDocuments.bytes(payload);
+    return this.client.publish(bytes, { mode: this.redirectOnly ? 'redirect' : 'popup', contentType: overlay ? 'application/gzip' : 'application/json', clientState: { snapshot, overlay }, fileName: overlay ? 'apptron-overlay.gz' : 'apptron-snapshot.json' }).then(async result => {
       if (result.redirected) return result;
-      this.transactionStorage?.removeItem(pending);
       if (!HashBinDocuments.isCID(result.cid)) throw new Error('HashBin returned an invalid CID.');
       await verifyCID(result.cid, bytes);
       return result;
-    }, error => { this.transactionStorage?.removeItem(pending); throw new Error(this.message(error)); });
+    }, error => { throw new Error(this.message(error)); });
   }
   message(error) {
     if (error.message === 'access_denied') return 'The save was cancelled on HashBin.';
     if (error.message === 'Publish window closed.') return 'The HashBin window was closed before the save was approved.';
     return error.message;
   }
-  /** Completes a redirect save; the SDK verifies the CID against the stored bytes. Failures return the pending snapshot. */
+  /** Completes a redirect save; the SDK verifies the CID. Cancelled and failed saves still return the snapshot (SDK v0.3.0). */
   async published(hash) {
     if (!new URLSearchParams(hash.replace(/^#/, '')).has('hashbin_publish')) return null;
-    const key = `hashbin:pending-publish:${this.clientId}`;
-    let pending = null;
-    try { pending = JSON.parse(this.transactionStorage?.getItem(key) || 'null'); this.transactionStorage?.removeItem(key); } catch { /* Nothing to restore. */ }
     try {
       const { cid, clientState } = await (await this.init()).handlePublishCallback({ hash });
       return { cid, snapshot: clientState?.snapshot, overlay: Boolean(clientState?.overlay) };
-    } catch (error) { return { error: this.message(error), snapshot: pending?.snapshot, overlay: Boolean(pending?.overlay) }; }
+    } catch (error) { return { error: this.message(error), snapshot: error.clientState?.snapshot, overlay: Boolean(error.clientState?.overlay) }; }
   }
   /** Tokens from an earlier OAuth flow are revoked server-side; clearing alone leaves copies valid. */
   async retireLegacyTokens() {

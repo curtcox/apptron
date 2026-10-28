@@ -44,18 +44,12 @@ class HashBinPanel {
       this.payload = overlay || HashBinDocuments.serialize(this.snapshot);
       this.fingerprint = this.getFingerprint();
       const size = HashBinDocuments.bytes(this.payload).length;
-      if (this.store.redirectOnly && size > REDIRECT_BYTES) {
-        this.message.replaceChildren(`This ${overlay ? 'overlay' : 'snapshot'} is ${size} bytes. From this isolated editor HashBin Publish takes up to ${REDIRECT_BYTES} bytes. Download it, upload it on `);
-        const upload = document.createElement('a');
-        upload.href = 'https://hashbin.org/upload.html'; upload.target = '_blank'; upload.rel = 'noopener'; upload.textContent = 'hashbin.org';
-        this.message.append(upload, overlay ? ', then add its CID as the snapshot’s overlay: header.' : ', then load its CID here.');
-        return;
-      }
       // Load the SDK now: a popup must open synchronously from the next click.
       await this.store.init();
       if (revision !== this.dialogRevision) return;
       this.message.textContent = `${size} bytes. HashBin shows the retention, exact price and your balance, and you approve the save on hashbin.org. This editor never holds your HashBin sign-in.` +
-        (this.store.redirectOnly ? ' The editor goes to HashBin and returns with your snapshot; a running VM stops.' : '');
+        (this.store.redirectOnly ? ' The editor goes to HashBin and returns with your snapshot; a running VM stops.' : '') +
+        (this.store.redirectOnly && size > REDIRECT_BYTES ? ` It is larger than a link can carry (${REDIRECT_BYTES} bytes), so it downloads as a file first; choose that file on HashBin.` : '');
       this.confirm.disabled = false;
     } catch (error) { if (revision === this.dialogRevision) this.message.textContent = error.message; }
   }

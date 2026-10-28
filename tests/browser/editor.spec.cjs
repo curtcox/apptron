@@ -36,7 +36,7 @@ test('an isolated editor saves through a HashBin Publish redirect and restores t
  await page.route('**/apptron/',async route=>{const response=await route.fetch();route.fulfill({response,body:(await response.text()).replace('name="hashbin-client-id" content=""','name="hashbin-client-id" content="test-client"')});});
  // HashBin Publish approves on its own page and redirects back, so the editor loads afresh.
  await page.route('https://hashbin.org/publish?**',route=>route.fulfill({contentType:'text/html',body:'<script>location.replace(new URL(location.href).searchParams.get("return"))</script>'}));
- await page.route('https://hashbin.org/sdk/v0.2.0/hashbin.js',route=>route.fulfill({body:sdk,contentType:'text/javascript',headers:{'Access-Control-Allow-Origin':'*'}}));
+ await page.route('https://hashbin.org/sdk/v0.3.0/hashbin.js',route=>route.fulfill({body:sdk,contentType:'text/javascript',headers:{'Access-Control-Allow-Origin':'*'}}));
  await ready(page);expect(await page.evaluate(()=>crossOriginIsolated)).toBe(true);
  const mine='# apptron snapshot v1\n-- mine.txt --\nkeep me\n';await page.evaluate(src=>ApptronOnline.setSource(src),mine);
  await page.locator('#hashbin-save').click();await expect(page.locator('#hashbin-confirm')).toHaveText('Review on HashBin');await expect(page.locator('#hashbin-confirm')).toBeEnabled();
