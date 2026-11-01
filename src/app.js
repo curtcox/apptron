@@ -20,6 +20,7 @@ const storage = (kind, prefix) => ({
   removeItem: key => { try { window[kind].removeItem(prefix + key); } catch { /* Storage may be unavailable. */ } }
 });
 const local = storage('localStorage', 'apptron:'), session = storage('sessionStorage', '');
+const drafts = new LocalDrafts({ storage: local, key: 'draft', serialize: value => writeDraft(value.source, value.provenance), parse: readDraft });
 installTxtarMode(ace);
 const editor = ace.edit('editor');
 editor.setTheme('ace/theme/tomorrow_night'); editor.session.setMode('ace/mode/txtar');
@@ -29,11 +30,11 @@ const host = new ApptronHost($('terminal'), status);
 const shareClient = new ShareClient();
 let dirty = false, applying = false, revision = 0, draftTimer, savedLink, shareVersion, overlayBlob, overlayURL;
 let sourceOrigin = provenance();
-const saveDraft = () => local.setItem('draft', writeDraft(source(), sourceOrigin));
+const saveDraft = () => drafts.attempt({source:source(),provenance:sourceOrigin});
 const source = () => editor.getValue();
 function sourceChanged() {
   revision++; savedLink = null; shareClient.cancel(); panel?.cancelLoad();
-  if (!applying) { dirty = true; if (sourceOrigin.kind === 'example') sourceOrigin = provenance('local'); }
+  if (!applying) { dirty = true; if (sourceOrigin.kind === 'example') sourceOrigin = provenance('local'); drafts.attempt({source:source(),provenance:sourceOrigin},true); }
   $('source-provenance').textContent = provenanceLabel(sourceOrigin);
   const size = new TextEncoder().encode(source()).length;
   $('source-size').textContent = size > 1024 ? (size / 1024).toFixed(1) + ' KiB' : size + ' B';
@@ -41,13 +42,13 @@ function sourceChanged() {
   catch { $('file-count').textContent = size > MAX_TEXT_BYTES ? 'Over 1 MiB limit' : 'Check snapshot format'; }
   clearTimeout(draftTimer); draftTimer = setTimeout(() => { try { saveDraft(); } catch { status('Draft could not be stored. Download or share your snapshot to keep a copy.'); } }, 300);
 }
-function setSource(value, origin = provenance('local')) { parseSnapshot(value); sourceOrigin = origin; applying = true; editor.setValue(value, -1); applying = false; dirty = false; }
+function setSource(value, origin = provenance('local')) { parseSnapshot(value); drafts.opened(); clearTimeout(draftTimer); sourceOrigin = origin; applying = true; editor.setValue(value, -1); applying = false; dirty = false; }
 function replaceSource(value, origin = sourceOrigin) { if (dirty && !confirm('Replace your unsaved editor changes with this snapshot?')) return false; setSource(value, origin); return true; }
 function view(name) { document.body.dataset.view = name; $('show-code').setAttribute('aria-pressed', String(name === 'code')); $('show-preview').setAttribute('aria-pressed', String(name === 'preview')); editor.resize(); host.resize(); }
 const store = new HashBinStore({ clientId: document.querySelector('meta[name="hashbin-client-id"]').content, redirectUri: new URL('./', location.href).href, storage: storage('localStorage', 'apptron:oauth:'), transactionStorage: session });
 let panel = new HashBinPanel({ store, getSnapshot: () => { parseSnapshot(source()); return { src: source(), type: 'apptron' }; }, getFingerprint: source,
   onLoad: (snapshot, cid) => {
-    if (!replaceSource(snapshot.src, provenance('hashbin', cid))) return false;
+    setSource(snapshot.src, provenance('hashbin', cid));
     $('hashbin-load-dialog').close(); savedLink = { source: source(), url: HashBinDocuments.link(location.href, cid) }; status('Loaded snapshot. Press Run to boot it.');
   },
   onSaved: (cid, fingerprint, link, overlay) => {
@@ -159,21 +160,14 @@ for (const button of document.querySelectorAll('[data-close]')) button.onclick =
 document.addEventListener('click', event => { if (!event.target.closest('.more')) document.querySelector('.more').open = false; });
 new ResizeObserver(() => editor.resize()).observe($('editor'));
 async function initialize() {
-  const draft = readDraft(local.getItem('draft'));
-  if (draft?.provenance.kind === 'example') {
-    try { if (draft.source !== await loadExample(draft.provenance.detail)) draft.provenance = provenance('stored'); }
-    catch { draft.provenance = provenance('stored'); }
-  }
-  setSource(draft?.source || await loadExample('hello-shell'), draft?.provenance || provenance('example', 'hello-shell'));
-  // A persisted draft may hold unsaved work even after a reload.
-  dirty = !!draft;
+  setSource(await loadExample('hello-shell'), provenance('example','hello-shell'));
   try {
     store.retireLegacyTokens().catch(() => { /* Retried on the next load. */ });
     // A redirect save returns here with its snapshot, approved or cancelled.
     const published = await store.published(location.hash);
     if (published) {
       history.replaceState(null, '', location.pathname + location.search);
-      if (published.snapshot?.src && published.snapshot.src !== source()) replaceSource(published.snapshot.src, provenance('stored'));
+      if (published.snapshot?.src && published.snapshot.src !== source()) setSource(published.snapshot.src, provenance('stored'));
       if (published.cid) panel.saved(published.cid, source(), published.overlay);
       if (published.error || !published.overlay) status(published.error || 'Saved to HashBin.');
     } else {
@@ -181,10 +175,10 @@ async function initialize() {
       const example = new URL(location.href).searchParams.get('example');
       if (cid) { await panel.load(cid); return; }
       const shared = readShareURL(location.href, LZString.decompressFromEncodedURIComponent);
-      if (shared !== null && shared !== source()) replaceSource(shared, provenance('share'));
+      if (shared !== null && shared !== source()) setSource(shared, provenance('share'));
       else if (example) {
         const value = await loadExample(example);
-        if (value !== source()) replaceSource(value, provenance('example', example));
+        if (value !== source()) setSource(value, provenance('example', example));
       }
     }
   } catch (error) { status(error.message); }
@@ -200,5 +194,15 @@ async function initializeWithIsolation() {
     else status('Browser isolation is unavailable. Wasm executables need a reload or another supported browser.');
   } catch (error) { status(error.message); }
 }
+drafts.mount(document.querySelector('.more .menu'), async value => {
+  let origin = value.provenance;
+  if (origin.kind === 'example') {
+    try { if (value.source !== await loadExample(origin.detail)) origin = provenance('stored'); }
+    catch { origin = provenance('stored'); }
+  }
+  panel.cancelLoad(); setSource(value.source,origin); history.replaceState(null,'',links().long);
+  status('Saved work restored — press Run.');
+});
+window.addEventListener('hashchange',()=>{clearTimeout(draftTimer);saveDraft();location.reload();});
 window.ApptronOnline = { editor, host, panel, getSource: source, setSource, initialized: initializeWithIsolation() };
 host.config().then(lock => { $('runtime-commit').textContent = lock.commit.slice(0, 7); }).catch(error => status(error.message));

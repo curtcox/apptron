@@ -12,16 +12,23 @@ test('T3 path-scoped VM CSP blocks data scripts and guest data URLs',async({page
  });
  expect(result.escaped).toBe(false);expect(result.violations.filter(e=>e.directive==='script-src-elem')).toHaveLength(2);expect(result.policy).not.toMatch(/script-src[^;]*'self'/);
 });
-test('T8 declines incoming links without replacing the stored draft and preserves provenance',async({page})=>{
+test('T8 URL documents load independently of saved drafts and preserve recovery',async({page})=>{
  await ready(page);const mine='# apptron snapshot v1\n-- mine --\nkeep my work\n';const shared='# apptron snapshot v1\n-- hostile --\nexternal source\n';
- await page.evaluate(({mine})=>ApptronOnline.setSource(mine),{mine});
+ await page.evaluate(({mine})=>ApptronOnline.editor.setValue(mine,-1),{mine});
  await expect.poll(()=>page.evaluate(()=>localStorage.getItem('apptron:draft'))).toContain('keep my work');
  const url=await page.evaluate(shared=>new URL('?compressed='+LZString.compressToEncodedURIComponent(shared),location.href).href,shared);
  let prompts=[];page.on('dialog',async dialog=>{prompts.push(dialog.message());await dialog.dismiss()});
- await ready(page,url);expect(prompts).toHaveLength(1);expect(await page.evaluate(()=>ApptronOnline.getSource())).toBe(mine);
+ await ready(page,url);expect(prompts).toHaveLength(0);expect(await page.evaluate(()=>ApptronOnline.getSource())).toBe(shared);expect(await page.evaluate(()=>localStorage.getItem('apptron:draft'))).toContain('keep my work');
  page.removeAllListeners('dialog');page.on('dialog',dialog=>dialog.accept());await ready(page,url);expect(await page.evaluate(()=>ApptronOnline.getSource())).toBe(shared);await expect(page.locator('#source-provenance')).toContainText('Shared link');
  await page.evaluate(()=>ApptronOnline.editor.setValue(ApptronOnline.getSource()+'# edit\n'));await expect.poll(()=>page.evaluate(()=>localStorage.getItem('apptron:draft'))).toContain('"kind":"share"');
- await ready(page,'./');await expect(page.locator('#source-provenance')).toContainText('Shared link');
+ await ready(page,'./');await expect(page.locator('#source-provenance')).toContainText('Gallery example');
+});
+test('draft recovery never trusts a forged gallery provenance',async({page})=>{
+ await ready(page);const source='# apptron snapshot v1\n-- mine --\nuntrusted edits\n';
+ await page.evaluate(source=>localStorage.setItem('apptron:draft',JSON.stringify({version:1,source,provenance:{kind:'example',detail:'hello-shell'}})),source);
+ await page.locator('#resume-work').evaluate(button=>button.click());await page.locator('#restore-work').click();
+ await expect(page.locator('#source-provenance')).toContainText('Restored draft · untrusted');
+ expect(await page.evaluate(()=>ApptronOnline.getSource())).toBe(source);
 });
 test('T8 persisted relay is visible and requires consent before Run',async({page})=>{
  await ready(page);await page.evaluate(()=>localStorage.setItem('apptron:relay','wss://unexpected.example/x/net'));
@@ -38,15 +45,15 @@ test('T4 direct data endpoints are inert and deny ungranted clients',async({page
  expect(result).toEqual({status:403,csp:'sandbox',sniff:'nosniff'});
 });
 
-test('T8 HashBin loads ask before replacing a restored draft and report cancellation',async({page})=>{
+test('T8 HashBin loads preserve previous drafts without confirmation',async({page})=>{
  await ready(page);const mine='# apptron snapshot v1\n-- mine --\nkeep my work\n';
- await page.evaluate(mine=>ApptronOnline.setSource(mine),mine);await expect.poll(()=>page.evaluate(()=>localStorage.getItem('apptron:draft'))).toContain('keep my work');
+ await page.evaluate(mine=>ApptronOnline.editor.setValue(mine,-1),mine);await expect.poll(()=>page.evaluate(()=>localStorage.getItem('apptron:draft'))).toContain('keep my work');
  const payload=JSON.stringify({format:'hashbin-diagram',version:1,type:'apptron',src:'# apptron snapshot v1\n-- incoming --\nfrom HashBin\n'});
  const size=Buffer.alloc(6);size.writeUIntBE(Buffer.byteLength(payload),0,6);const cid=size.toString('base64url')+createHash('sha512').update(payload).digest('base64url');
  await ready(page,'./index.html');
  let prompts=0;page.on('dialog',async dialog=>{prompts++;await dialog.dismiss()});
  await page.evaluate(async({payload,cid})=>{ApptronOnline.panel.store.fetchSource=async()=>new Response(payload);await ApptronOnline.panel.load(cid)},{payload,cid});
- expect(prompts).toBe(1);expect(await page.evaluate(()=>ApptronOnline.getSource())).toBe(mine);await expect(page.locator('#hashbin-status')).toContainText('Load cancelled');
+ expect(prompts).toBe(0);expect(await page.evaluate(()=>ApptronOnline.getSource())).toContain('from HashBin');expect(await page.evaluate(()=>localStorage.getItem('apptron:draft'))).toContain('keep my work');await expect(page.locator('#hashbin-status')).toContainText('Loaded');
 });
 
 test('unsupported credential-vault configuration disables account actions',async({page})=>{

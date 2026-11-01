@@ -127,3 +127,7 @@ origin pins and first-response headers. The VM host must support those headers;
 the editor may stay on Pages. HashBin saves use HashBin Publish, so no origin holds
 HashBin credentials. Relay permissions bind to exact source, runtime and destination;
 Network can revoke them immediately.
+
+### URLs and saved work
+
+Program URLs always open the linked document, regardless of browser history or local drafts. The homepage opens the default example. Use **Resume saved work** in the editor controls to recover local drafts. Viewing or running a link keeps saved work; editing it retains the previous draft for recovery.

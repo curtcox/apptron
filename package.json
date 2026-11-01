@@ -12,7 +12,8 @@
     "test": "node --test tests/*.test.js",
     "test:browser": "playwright test",
     "test:boot": "APPTRON_BOOT=1 playwright test tests/browser/boot.spec.cjs --project=chromium",
-    "build": "node scripts/package-site.mjs"
+    "build": "node scripts/package-site.mjs",
+    "test:urls": "node tests/browser/url-state.cjs"
   },
   "repository": {
     "type": "git",

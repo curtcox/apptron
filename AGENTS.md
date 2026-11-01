@@ -20,3 +20,7 @@ works at `/apptron/` on GitHub Pages and at any localhost subpath.
   HashBin saves are quoted and confirmed on hashbin.org through HashBin Publish (pinned SDK); never reintroduce HashBin tokens on this origin, which runs untrusted VMs. Isolated editors must use the redirect handoff.
 - Publication is controlled by the owner's `APPTRON_DEPLOY_ENABLED` repository
   variable. The owner has requested GitHub Pages deployment in this chat.
+
+## URL identity and draft recovery
+
+Explicit program, source, example and CID URLs always load their document, independent of browser drafts. Never gate URL loading on a replacement confirmation. The bare homepage opens the default document. Preserve local drafts separately with LocalDrafts and offer Resume saved work. Opening or running a URL must not overwrite saved work; edits retain the previous draft for recovery. Keep stale-load guards and execution isolation.

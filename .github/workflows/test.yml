@@ -30,7 +30,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: scripts/test-browser-container.sh tests/browser/editor.spec.cjs tests/browser/security.spec.cjs tests/browser/isolation-spike.spec.cjs --project=${{ matrix.browser }} --project=${{ matrix.browser }}-phone
+      - run: scripts/test-browser-container.sh tests/browser/editor.spec.cjs tests/browser/security.spec.cjs tests/browser/isolation-spike.spec.cjs tests/browser/url-state.spec.cjs --project=${{ matrix.browser }} --project=${{ matrix.browser }}-phone
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
