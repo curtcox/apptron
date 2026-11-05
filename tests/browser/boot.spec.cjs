@@ -1,14 +1,14 @@
 const { test, expect } = require('@playwright/test');
 const { readFileSync } = require('node:fs');
 test.beforeEach(async({page},testInfo)=>test.skip(process.env.APPTRON_BOOT!=='1'||testInfo.project.name!=='chromium','Real VM boot runs explicitly in Chromium.'));
-async function boot(page,source){await page.goto('./');await page.waitForFunction(()=>crossOriginIsolated&&window.ApptronOnline);await page.evaluate(()=>ApptronOnline.initialized);if(source)await page.evaluate(s=>ApptronOnline.setSource(s),source);await page.locator('#run').click();await expect(page.locator('#run')).toBeEnabled({timeout:180000});await expect(page.locator('#status')).toContainText('Running ·');}
+async function boot(page,source){await page.goto('./');await page.waitForFunction(()=>crossOriginIsolated&&window.ApptronOnline);await page.evaluate(()=>ApptronOnline.initialized);if(source)await page.evaluate(s=>ApptronOnline.setSource(s),source);await page.locator('#run').click();await expect(page.locator('#run')).toBeEnabled({timeout:180000}).catch(async error=>{console.log('Boot status: '+await page.locator('#status').textContent());throw error;});await expect(page.locator('#status')).toContainText('Running ·');}
 async function terminal(page){return page.locator('#terminal iframe').contentFrame().locator('.xterm');}
 async function text(page){return page.evaluate(()=>{const b=ApptronOnline.host.frame.contentWindow.apptron.terminal.buffer.active;return Array.from({length:b.length},(_,i)=>b.getLine(i)?.translateToString()).join('\n')});}
 test('boots a real shell from a Pages subpath, syncs a VM edit and captures it',async({page})=>{
  test.setTimeout(240000);await boot(page);await expect.poll(()=>text(page),{timeout:90000}).toContain('guest:/project');
  await page.evaluate(()=>ApptronOnline.host.sendKey("printf 'from the VM\\n' > captured.txt\r"));
  await expect.poll(()=>page.evaluate(()=>ApptronOnline.host.frame.contentWindow.apptron.instance.readText('project/captured.txt').catch(()=>'')),{timeout:15000}).toContain('from the VM');
- await page.locator('#capture').click();await expect(page.locator('#status')).toContainText('Project files captured',{timeout:20000});expect(await page.evaluate(()=>ApptronOnline.getSource())).toContain('from the VM');
+ await page.locator('#more-toggle').click();await page.locator('#capture').click();await expect(page.locator('#status')).toContainText('Project files captured',{timeout:20000});expect(await page.evaluate(()=>ApptronOnline.getSource())).toContain('from the VM');
  const result=await page.evaluate(async()=>{const w=ApptronOnline.host.frame.contentWindow.apptron.instance;await w.writeFile('#scratch/probe','scratch works');return w.readText('#scratch/probe')});expect(result).toBe('scratch works');
 });
 test('restores the Docker-built Python overlay and executes Python offline',async({page})=>{
@@ -103,4 +103,10 @@ printf 'SECURITY_PROBE_DONE\\n'
   return {denied,escaped:window.__apptron_escape,stolen:window.__apptron_stolen,unsafe:divs.some(el=>el.hasAttribute('onmouseover')||el.hasAttribute('style')),styles:[...frame.document.querySelectorAll('style')].some(el=>el.textContent.includes('egress.invalid'))};
  },previous);
  expect(result.escaped).toBeUndefined();expect(result.stolen).toBeUndefined();for(const [path,denied] of Object.entries(result.denied))expect(denied,path).toBe(true);expect(result.unsafe).toBe(false);expect(result.styles).toBe(false);expect(sockets).toEqual([]);expect(await text(page)).toContain('LOCAL_SYMLINK_WORKS');
+});
+
+for(const [name,source]of [['shell',undefined],['Python overlay',readFileSync('examples/python.txtar','utf8')]])test('a verified previously booted '+name+' reloads and runs with the browser fully offline',async({page,context})=>{
+ test.setTimeout(240000);await boot(page,source);await expect.poll(()=>text(page),{timeout:90000}).toContain('guest:/project');
+ await page.reload();await page.waitForFunction(()=>window.ApptronOnline);await page.evaluate(()=>ApptronOnline.initialized);
+ await context.setOffline(true);await page.locator('#run').click();await expect(page.locator('#run')).toBeEnabled({timeout:180000});await expect(page.locator('#status')).toContainText('Running ·');await expect.poll(()=>text(page),{timeout:90000}).toContain('guest:/project');
 });

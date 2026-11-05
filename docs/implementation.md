@@ -68,7 +68,7 @@ data, or blob page scripts. It still allows blob workers and Wasm compilation.
 The host uses a validated bridge for key input, resize, project/overlay capture
 and reset; filesystem operations execute in the VM document.
 HTTP data mounts require revocable boot grants and all data responses are inert.
-Overlay validation, CID integrity, draft provenance/replacement consent, relay
+Overlay validation, CID integrity, draft provenance/explicit recovery, relay
 session consent and trusted-area labels are implemented too.
 
 The B1 spike in `tests/browser/isolation-spike.spec.cjs` rules out an opaque
@@ -85,7 +85,7 @@ status for the remaining architecture and its storage-isolation caveat.
 
 The editor, VM host, subpath-safe service worker, snapshot parser/capture,
 overlay capture/restore, compressed and shortened sharing links, QR generator,
-HashBin load/save/OAuth/quote controls, mobile key bar, nine examples, searchable
+HashBin load/Publish controls, mobile key bar, nine examples, searchable
 gallery, docs, runtime scripts, release/Pages workflows, and Dependabot config
 are present. Vendored browser dependencies have license notices and a refresh
 script. Large runtime files are ignored.
@@ -150,3 +150,24 @@ runtime too. Relative symlinks remain the supported creation path; prebuilt
 archive symlink targets are preserved by overlay restore. The security backend
 rejects direct symlink dereferencing against the database root and provides
 read-only no-follow inspection for namespace adapters.
+
+## Shared editor migration (v0.3.4)
+
+Fragment Kit now owns the header/drawer, mobile tabs, explicit draft recovery,
+Share/shortener, QR generation/scanning, CID helpers and atomic application cache.
+The strict txtar and gzip-overlay adapters stay app-owned. Publish initializes
+before the confirm click and invokes the SDK synchronously; isolated pages retain
+redirect handoff. Binary content is verified without string coercion. Legacy
+transactions are read only for this app's client; new transactions are prefixed.
+
+The existing module service worker retains data grants and isolation headers. Its
+lazy runtime cache bounds and hashes scripts, metadata and overlays against the
+actual locked release; it never caches user data endpoints or counts deferred VM
+assets as editor readiness. The unchanged runtime remains under ignored runtime/.
+The VM-only artifact includes only shared CID/byte/cache modules and their license,
+with all editor, SDK, gallery and account UI excluded. Paired-origin deployment
+still requires the owner configuration and response headers in deployment.md.
+
+Shared CI and Pages workflows are pinned to immutable v2, with kit v0.3.4 supplied
+explicitly. Browser jobs use the matching Playwright browsers on Ubuntu 24.04;
+the actual VM boot/isolation job retains its matching container and owner gate.

@@ -1,0 +1,5 @@
+import fs from'node:fs/promises';import{createHash}from'node:crypto';
+const lock=JSON.parse(await fs.readFile('runtime.lock','utf8')),file='runtime/'+lock.commit+'/runtime.json',raw=await fs.readFile(file),hash=bytes=>createHash('sha256').update(bytes).digest('hex');if(hash(raw)!==lock.manifestSha256)throw Error('Runtime manifest checksum mismatch.');
+const manifest=JSON.parse(raw),files={};for(const[name,pin]of Object.entries(manifest.files))if(/\.(js|css)$/.test(name)||name.startsWith('overlays/'))files['runtime/'+lock.commit+'/'+name]={sha256:pin.sha256,size:pin.size};
+files[file]={sha256:lock.manifestSha256,size:raw.length};const source=JSON.stringify({commit:lock.commit,release:lock.release,manifestSha256:lock.manifestSha256,files},null,2)+'\n';
+if(process.argv.includes('--check')){if(await fs.readFile('runtime-assets.json','utf8')!==source)throw Error('Runtime cache pins are stale.');}else await fs.writeFile('runtime-assets.json',source);console.log(Object.keys(files).length+' deferred runtime/script/overlay pins match the locked release.');

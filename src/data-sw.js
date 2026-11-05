@@ -1,3 +1,5 @@
+import{offlineResponse}from'./offline-cache.js';
+import{runtimeResponse}from'./runtime-cache.js';
 import { verifyRuntimeScript } from './runtime-integrity.js';
 import { DataGrants } from './data-access.js';
 import { SnapshotStore } from './store.js';
@@ -6,8 +8,6 @@ const store = new SnapshotStore();
 const grants = new DataGrants();
 const vmBase = new URL('vm-data/', self.registration.scope).pathname;
 const base = new URL('data/', self.registration.scope).pathname;
-self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
 self.addEventListener('message', event => {
   event.waitUntil((async () => {
     const client = event.source, message = event.data;
@@ -37,7 +37,7 @@ self.addEventListener('fetch', event => {
     // Pages cannot configure these headers. WASI workers need SharedArrayBuffer,
     // so the service worker adds isolation on subsequent document navigations.
     let response;
-    try { response = await verifyRuntimeScript(event.request, await fetch(event.request), self.registration.scope); }
+    try { response = await (runtimeResponse(event.request) ?? offlineResponse(event.request) ?? verifyRuntimeScript(event.request, await fetch(event.request), self.registration.scope)); }
     catch (error) { response = new Response(error.message, { status: 502, headers: { 'Content-Type': 'text/plain', 'X-Content-Type-Options': 'nosniff' } }); }
     if (!response.status || response.status === 304) return response;
     const headers = new Headers(response.headers);

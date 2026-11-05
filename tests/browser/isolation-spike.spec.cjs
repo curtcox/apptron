@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 test('B1 feasibility: opaque frame cannot provide durable VM storage', async ({page,browserName}) => {
- // Use the non-runtime gallery document so the app CSP does not intentionally block this probe's inline script.
- await page.goto('gallery.html');
+ // Probe the browser's opaque-origin storage behavior independently of the app CSP.
+ await page.goto('about:blank');
  const result = await page.evaluate(()=>new Promise(resolve=>{
    const frame=document.createElement('iframe');frame.sandbox='allow-scripts';
    const listener=e=>{if(e.source===frame.contentWindow){window.removeEventListener('message',listener);frame.remove();resolve(e.data)}};

@@ -1,0 +1,65 @@
+{
+  "dependencies": {
+    "src/examples.js": "e17df7c53d78fecc8e52313840e0aa65dafbc79e450715223a1c0e60dee979e4",
+    "src/fragment-config.js": "78dcd63ee13469bc820ce2e33544dc605f37947b48d1339e05193d173d41c8c9",
+    "runtime.lock": "dfe0cf2338afcf9b0d8d5f41b1bc3da294b7a344827ce230baeca1e4b7ffae2b",
+    "scripts/render-gallery.cjs": "c4968483b19159458bb9080c18e34143e1c65bf5dca1f45d5a093d6462c82cfc",
+    "examples/hello-shell.txtar": "d2242f4ade90895bf53224e3068338126cec32f2f094c8099f5ed7de0b72182d",
+    "examples/screenshots/hello-shell.png": "a8acb7e96ad6af38ace3c667cea636b73ed48a920f996196b708d72d9b7988eb",
+    "examples/go-hello.txtar": "15a96a50cc72b318be7fd2f504b2e7f7b4f537817ccc62b0b224a296bb155d79",
+    "examples/screenshots/go-hello.png": "4a46bec74b91dacbb9c70070351713232e3cc7fcd9a7be6776da31b64f2b9986",
+    "examples/python.txtar": "03d86a0a804f0eed1a2134ed673b4ad4b27d216b369a0f61fc1e1447a012c170",
+    "examples/screenshots/python.png": "00639d12a23c298ca6f6814aa710876c92dc20c0733c1e546210f5a0d177118c",
+    "examples/c-make.txtar": "285be5e06ebd37efd68c5ee681438ba7d60aae8d0216bf8df160256bd7f8fd95",
+    "examples/screenshots/c-make.png": "184097cad539160d9247a821e04f46976a38fe9fc5a1ea4c6b2f9cb9a466ae43",
+    "examples/node.txtar": "6c5a1d292c1f5439b841929aee5fd59dc5935fadb1455ddd6a0ddf0e3679b1e9",
+    "examples/screenshots/node.png": "db82c4f435bdb01bc1a9c604f8c9a718ec368938e32f6fa92b419934e27b9e41",
+    "examples/esbuild.txtar": "a32736a3d713ee12f2ccbf717925fc8b882810e86e1308dbf5e2969af02b0a21",
+    "examples/screenshots/esbuild.png": "03c152af35970bca489bdfbb294122c62e962bb492f7ba48aa716af6cfb8eeb3",
+    "examples/wasm.txtar": "4e5cdc3088f8a7a5beb851336176760e1c88824d72bcac6ffed8f667cbc6702d",
+    "examples/screenshots/wasm.png": "5f5f7e07334258b905e4539c989126a7049b1d913ca2620463b8dee4254ccade",
+    "examples/fun.txtar": "09619ded69c0446f137d3ab4c658607e39539bd8fcb3cf57c2fd86c53f520db3",
+    "examples/screenshots/fun.png": "51c3c0def72af95b8e1b4c3f8fe02d6e8db421e57b9ee9da1c7153c61d7b472c",
+    "examples/envbuild.txtar": "443c18028093736f3a7b5444c3374492851589d58d825207c08625e92fe533f0",
+    "examples/screenshots/envbuild.png": "88b4ea66dd810d2ba7cc44566dbea9de9ebc7bc36d6f6d358494a7b530c62b34"
+  },
+  "renderer": "9b6f951fae9a93783d122da4d0753191747177ffd2961812fc52a539e49fe9fa",
+  "examples": {
+    "hello-shell": {
+      "document": "ed6224db60d3044011bb364394b529829992737fe4f1c6335c33043f422adfa2",
+      "cover": "a478e9e3e7a70ec0f64f88031bc91d8198e0fabaab04ae44390c2e9c0f563046"
+    },
+    "go-hello": {
+      "document": "a506c3df77271dcac26686d0777aa199c48417779989fd47ef1a02ca8df36f97",
+      "cover": "000d818c4986c0455ac5c4056caf5fdc815b1e9d1a4e41d40ed9f997056d3691"
+    },
+    "python": {
+      "document": "a83cf67de1346fa3e5c54b06ff32ac45754e31d6bc87f54725baff03b383619b",
+      "cover": "cb2bf3a8a60b701c71e5d77151b5b4f1065824c14f3060ffd17d619d8e11298d"
+    },
+    "c-make": {
+      "document": "25fe92f22b442ed4a282ebccffabceb5bc3e9843dd21643d3e2b26baf5b83d14",
+      "cover": "1bc709f6ae42c3a918b71117cb5d751b8619d80aa5bbea01d82ae47a97ce9119"
+    },
+    "node": {
+      "document": "92d85ba687d5319453c91fb0094b21ba17df64f9aae91661363ef6b70eb469e6",
+      "cover": "d7b57ecf0a77b96ec71e2860de04823d586130f271fb12cde0b33c0b8760ef51"
+    },
+    "esbuild": {
+      "document": "e0ce9ba3fcc4cb56ea291ddba9c91ec61a0d80c6f3fc432978e0007b745078e5",
+      "cover": "f7275d490b84f6544fc86125cdb0d3cd1b6c09749876e1317d0d8b358539b131"
+    },
+    "wasm": {
+      "document": "dcf5e8ba84826079830231f85a950599cbde787216b3670e09a1cc34fd8c2bbc",
+      "cover": "a5d479f5c362080268e7a967a765fd7e5ca25dee6e4b0201dccd503735791e9b"
+    },
+    "fun": {
+      "document": "ce2107c77731557848de89b690f59b60950ed3d187949886290d2c42600bc903",
+      "cover": "e2e00242ab4aa2a6755e4a0e19e6f69af6019036575391c4945eee499c47391a"
+    },
+    "envbuild": {
+      "document": "4f9bc9c932e02f540ebbc6b2f3ecbd7f8fb2f4cd4020b7de8e557b9e384da711",
+      "cover": "f2b141046bab7984868a0d27fb69216bae15ac112c078382cccfd1ce7a0787ac"
+    }
+  }
+}

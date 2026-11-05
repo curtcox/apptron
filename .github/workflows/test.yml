@@ -3,39 +3,24 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_call:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  unit:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm test
-  browser:
-    runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        browser: [chromium, firefox, webkit]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: scripts/test-browser-container.sh tests/browser/editor.spec.cjs tests/browser/security.spec.cjs tests/browser/isolation-spike.spec.cjs tests/browser/url-state.spec.cjs --project=${{ matrix.browser }} --project=${{ matrix.browser }}-phone
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: browser-failures-${{ matrix.browser }}
-          path: test-results/
+  shared:
+    uses: curtcox/Tools-for-pages-with-state-in-URL-fragments/.github/workflows/test.yml@v2
+    with:
+      kit-path: vendor/fragment-kit-v0.3.4
+      contract-config: testing-contract.config.mjs
+      base-url: http://127.0.0.1:4173/apptron/
+      server-command: node scripts/serve.mjs
+      browser-command: npx playwright test tests/browser/editor.spec.cjs tests/browser/legacy-links.spec.cjs tests/browser/security.spec.cjs tests/browser/isolation-spike.spec.cjs tests/browser/url-state.spec.cjs --project="$BROWSER" --project="$BROWSER-phone"
+      gallery-command: node scripts/render-kit-gallery.mjs --check
+  kit:
+    uses: curtcox/Tools-for-pages-with-state-in-URL-fragments/.github/workflows/kit-check.yml@v2
+    with:
+      kit-path: vendor/fragment-kit-v0.3.4
   boot:
     if: vars.APPTRON_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-24.04

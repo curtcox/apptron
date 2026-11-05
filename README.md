@@ -38,7 +38,7 @@ node scripts/runtime-manifest.mjs runtime/$(git -C upstream/apptron rev-parse HE
 - Service worker implements Apptron's r2fs file sync on a Pages subpath.
 - Capture project files, download snapshots, capture and restore disk overlays.
 - Offline package overlays for Python, C/Make, Node and terminal toys; lazy Go bundles.
-- Compressed links, optional is.gd shortening, QR preview and PNG download.
+- Compressed links, optional is.gd shortening, QR scanning and SVG/PNG downloads through Fragment Kit.
 - HashBin loading, and saves approved with their price on hashbin.org (HashBin Publish), with stale-load guards.
 - Searchable nine-example gallery, documentation, responsive Code/Preview toggle,
   virtual keyboard refitting, and terminal key bar.
@@ -56,6 +56,7 @@ until a HashBin app is registered.
 
 ```sh
 npm test
+npm run check
 npx playwright install --with-deps
 npm run test:browser
 npm run test:boot
@@ -131,3 +132,23 @@ Network can revoke them immediately.
 ### URLs and saved work
 
 Program URLs always open the linked document, regardless of browser history or local drafts. The homepage opens the default example. Use **Resume saved work** in the editor controls to recover local drafts. Viewing or running a link keeps saved work; editing it retains the previous draft for recovery.
+
+## Fragment Kit integration
+
+The editor pins Fragment Kit v0.3.4 as native ES modules. The adapter validates txtar,
+reads legacy source/compressed/CID links and writes the existing compressed format.
+All incoming links require manual Run; relay settings are excluded. Drafts remain
+separate and can be resumed from More. Publish uses a redirect on isolated pages,
+verifies returned CIDs against the exact original bytes and retains overlay capture.
+The app-owned VM, grants, runtime lock, patches and terminal renderer are unchanged.
+
+Offline readiness describes the editor. Run downloads the VM and selected overlays
+on demand; their bounded bytes are checked against the locked release before caching.
+The VM cache is separate from the atomic editor installation. After a successful
+online Run, shell and Python snapshots can reboot without browser networking.
+Use npm run gallery and npm run offline after changing gallery inputs or public
+assets; npm run check verifies generated files and immutable pins. Gallery terminal
+media still comes from the original real-VM producer in scripts/render-gallery.cjs.
+
+The recovery deployment remains owner-gated. The proposed canonical origin and
+HashBin client registration require owner setup; no new registration is implied.

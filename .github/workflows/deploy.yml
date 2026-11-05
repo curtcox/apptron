@@ -11,41 +11,22 @@ permissions:
   contents: read
   pages: write
   id-token: write
-concurrency:
-  group: pages
-  cancel-in-progress: false
 jobs:
-  build:
+  tests:
     if: vars.APPTRON_DEPLOY_ENABLED == 'true' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: scripts/fetch-runtime.sh
-        env:
-          GH_TOKEN: ${{ github.token }}
-      - run: npm run build
-        env:
-          APPTRON_VM_URL: ${{ vars.APPTRON_VM_URL }}
-          APPTRON_EDITOR_ORIGIN: ${{ vars.APPTRON_EDITOR_ORIGIN }}
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
+    uses: ./.github/workflows/test.yml
   deploy:
-    needs: build
-    runs-on: ubuntu-24.04
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
+    needs: tests
+    uses: curtcox/Tools-for-pages-with-state-in-URL-fragments/.github/workflows/pages.yml@v2
+    with:
+      path: dist
+      verify-marker: apptron-fragment-kit-v0.3.4
+      stage-command: |
+        npm ci
+        scripts/fetch-runtime.sh
+        node --input-type=module <<'JS'
+        import {execFileSync} from 'node:child_process';
+        const vmURL = ${{ toJSON(vars.APPTRON_VM_URL) }};
+        const editorOrigin = ${{ toJSON(vars.APPTRON_EDITOR_ORIGIN) }};
+        execFileSync('npm',['run','build'],{stdio:'inherit',env:{...process.env,APPTRON_VM_URL:vmURL,APPTRON_EDITOR_ORIGIN:editorOrigin}});
+        JS
