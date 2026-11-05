@@ -68,7 +68,7 @@
     }
   },
   "prefix": "apptron-offline",
-  "version": "apptron-offline-328fdc4049f52393",
+  "version": "apptron-offline-bd8da5295f658d0c",
   "assets": [
     "data-sw.js",
     "deployment-config.js",
@@ -271,7 +271,7 @@
     "src/offline-bootstrap.js": "8b25a84714f61842988a8c78a738eda2321471ce0cbcd96732b9c27871b79136",
     "src/offline-cache.js": "27ea69846446b4fdd33889ffea2326e36eb924b165dd105bb02066d45bf6d76c",
     "src/overlay.js": "104bcfa894f7d9dc74287271745ec6b303cf34c18fabc1eef28cc46dee195f22",
-    "src/page-policy.js": "bc1820647858e52dec168e30a672d3c6022ceb51400da6174b3b6dc2f150f46c",
+    "src/page-policy.js": "8cb5ce0617521395d51547b14af2141f8b69def9f7219bd32e4266c86d44bf97",
     "src/qr-panel.js": "12e14c3b106710c409dc1745052d7e18ae23738a599ad8ff13c879eae492e3da",
     "src/r2fs.js": "2fd7466e7769c983ca24cf73b0484b632d8158b5f281b7b0cb3ed81dff8c238a",
     "src/read-limited.js": "70d86b6493b6fbec92659f58be75b2b6662e8cc8130b4f9571d0af6b4392cffa",
