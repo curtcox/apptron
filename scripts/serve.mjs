@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { resolve, extname, sep } from 'node:path';
 const root = resolve(process.env.SITE_DIR || process.env.APPTRON_EDITOR_SITE_DIR || '.');
-const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.lock': 'application/json', '.wasm': 'application/wasm', '.png': 'image/png', '.gz': 'application/gzip', '.svg': 'image/svg+xml', '.txtar': 'text/plain' };
+const types = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.lock': 'application/json', '.wasm': 'application/wasm', '.png': 'image/png', '.gz': 'application/gzip', '.svg': 'image/svg+xml', '.txtar': 'text/plain' };
 createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost');

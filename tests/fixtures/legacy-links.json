@@ -1,0 +1,202 @@
+{
+  "repo": "apptron",
+  "slug": "apptron",
+  "commit": "6bdfc021e21cac84fb583e5c7410a8688bafb5e5",
+  "example": {
+    "id": "hello-shell",
+    "source": "# apptron snapshot v1\n-- .apptron/envrc --\ncd /project\necho\necho \"Hello from a real Linux VM.\"\necho \"Try: sh hello.sh\"\necho\n-- hello.sh --\n#!/bin/sh\nprintf 'Hello, %s!\\n' \"${1:-Apptron}\"\nprintf 'Kernel: '; uname -sr\nprintf 'Project files:\\n'; ls -la /project\n",
+    "raw": "{\"format\":\"hashbin-diagram\",\"version\":1,\"type\":\"apptron\",\"src\":\"# apptron snapshot v1\\n-- .apptron/envrc --\\ncd /project\\necho\\necho \\\"Hello from a real Linux VM.\\\"\\necho \\\"Try: sh hello.sh\\\"\\necho\\n-- hello.sh --\\n#!/bin/sh\\nprintf 'Hello, %s!\\\\n' \\\"${1:-Apptron}\\\"\\nprintf 'Kernel: '; uname -sr\\nprintf 'Project files:\\\\n'; ls -la /project\\n\"}",
+    "expected": {
+      "src": "# apptron snapshot v1\n-- .apptron/envrc --\ncd /project\necho\necho \"Hello from a real Linux VM.\"\necho \"Try: sh hello.sh\"\necho\n-- hello.sh --\n#!/bin/sh\nprintf 'Hello, %s!\\n' \"${1:-Apptron}\"\nprintf 'Kernel: '; uname -sr\nprintf 'Project files:\\n'; ls -la /project\n",
+      "type": "apptron"
+    }
+  },
+  "sourceFiles": {
+    "README.md": "a15c3bdf4df69c28ea13e225173fd2d8a55b2a8a37fa6b5c20dac3366471f9db",
+    "docs/deployment.md": "af163c2be09f4128f226804c97eed1563cff2c438003685139ed9fc6210490ba",
+    "docs/gallery-plan.md": "9960d29986cbc8e6aa7329293d0ea2acdc262bbb58ecc690cc9e3d56b470061a",
+    "docs/implementation.md": "5a23f1f0cb1a620c4f2b4afcbce637f6425df81ea7e5fa09c5c065b6359735fd",
+    "docs/plan.md": "2bd264e40432e800c3f182a959a0263bfe4c4f72a037ca29eecfd4639cd2f36d",
+    "docs/security.md": "87e77411d9f83f6394a6b36e9a1760da1012c32d7ced0173ae550fe3b07258c2",
+    "index.html": "40cadf912459eb0dc6ee1ef185bb05f3edbc3853335d971f233ff8ddc2e4cf9b",
+    "src/app.js": "e060074d4a75abde87f970c626743e34a01df919a31b84712500f6c022f4565d",
+    "src/apptron-host.js": "f000f7b4100955cf4943ead534233dd9d855bbc4a740370819f8142b707ee6ea",
+    "src/bridge.js": "881d4a1ba9d1d73bb24ddee8e4f50e1868bcf79c43c4ccdc2c445d4d3a924775",
+    "src/capture.js": "a03bf9389520b786387f10625632a0d01f472b11c41458e20c8b3040bfa50838",
+    "src/content-id.js": "9b3ef3c61d2bb799c1403a6dcdbb8cca3eddd48715a62970bc6c228a24184c9f",
+    "src/data-access.js": "9a7957ced447e01db021cf1407b750d6dda11487b35fde601bf2c78ffec2f658",
+    "src/data-sw.js": "2bb6d57dcada0449b026ee001095b8d45ddf897ed76ed0ed4abff749562f33e6",
+    "src/deployment.js": "39f06bd71519104cd44ceab588812806eef8751a7414a86d07b4e0aa1cb6af9d",
+    "src/draft.js": "722cf5423cec2935b6b2586df8264627e1c220bc6124e1fe9c61194b266ae1ee",
+    "src/examples.js": "e17df7c53d78fecc8e52313840e0aa65dafbc79e450715223a1c0e60dee979e4",
+    "src/gallery.js": "8c717cf15c3e8d5c3709f1158b254073c8609cc8a7095b7f09f1e5a6532939ae",
+    "src/hashbin-panel.js": "3d58d73d9bb8d5df74dd7ff4213983e16a16b78e21b9e251110ec17b292f9d56",
+    "src/hashbin.js": "43c692f00279aa6e2d8ce4e094b95fa72f58872b6f082bc57bddb446328d8470",
+    "src/keybar.js": "05feb3afb124acffb58a354fe6a8c52b5b1928639a9b6824a5929c83c7bf55b3",
+    "src/local-drafts.js": "63b3e2ab8ad18a3088ff40386bb64e3a2d133ae32fbc7968a662b9069023cb85",
+    "src/network.js": "ae320a38bd215bd4ebf5548f7fb3a4acb43009d6598af4b3cdb79345dce1a15e",
+    "src/overlay.js": "104bcfa894f7d9dc74287271745ec6b303cf34c18fabc1eef28cc46dee195f22",
+    "src/page-policy.js": "6173ab80ecf5e5763fdab9934a57f2ebeca68e64f72e8f0c328fcdd846182a86",
+    "src/qr-panel.js": "abe49db3810d08192d514fcc7d04d7dd27a200614064c94f0a9883c0d5fb94b6",
+    "src/r2fs.js": "2fd7466e7769c983ca24cf73b0484b632d8158b5f281b7b0cb3ed81dff8c238a",
+    "src/read-limited.js": "70d86b6493b6fbec92659f58be75b2b6662e8cc8130b4f9571d0af6b4392cffa",
+    "src/runtime-integrity.js": "93baf5a86a9e18089bd9fc729029f9f65761bdce2ec9dbd2cecd0f2b90725e3c",
+    "src/share-links.js": "cc336d7b39c0ac00f8e1ce83b033746b1f9b2f18a9298928c04a1e2961a0f010",
+    "src/snapshot.js": "e2f5fc5966c8fc13c1359456151116d1bd97b00ed2267161379fbc4901f8c160",
+    "src/store.js": "670b5f2fe4665354d0ddf8d0efcb7a7e21077e9a26426571d603d144abff6ce7",
+    "src/tar.js": "8707cd01f9b1e85163473e602e670009c2f2ea233614888f76d1af071c304990",
+    "src/txtar-mode.js": "99602bf8493060952fb21024c803a47df7b84712f9553ec606df5037112285ed",
+    "src/vm-frame.js": "df36e90d86102d5ea45db745994432c61a2b3fd2345ef929feac7b19e3249eab",
+    "src/wanix-disk.js": "cf101c6f8289206a1816ff9be3c9380aa6202f36dd877c1c9ed76c20e359a0dd",
+    "tests/browser/boot.spec.cjs": "53e7a16755b6c566afe031215832591993c18bb3ecdd5f1f76c140de9f1616dc",
+    "tests/browser/editor.spec.cjs": "800b5f7d20b62989d3710deefbd310df52a2377ccd8e18e9c1eea73c5ff958b1",
+    "tests/browser/isolation-spike.spec.cjs": "b7054349d9d1188dc9023afc0bda9190291a383b0a622bc8bef74c90dd7e3926",
+    "tests/browser/isolation.spec.cjs": "1e995a10c113662f51f6c240a38513e62d63c60e0ea8c113661d9c8b8fdab3d3",
+    "tests/browser/security.spec.cjs": "81126d6e053c64b9891d0141582c3b3ac116918219e5dba1867fea5a73f785de",
+    "tests/browser/url-state.cjs": "eeca612e287af604709b3bb960dd191cdfd76aa0df9cff5e3a8dc04bf3e4f441",
+    "tests/browser/url-state.spec.cjs": "1a9fc82e468c6cb88865fe474a1e133305e9352cb2b33d88121f994cfa63e266",
+    "tests/deployment.test.js": "2a5ff30bef8f2ed9204072e3ae675adbb66346a7104a48af6eb0bb7ba2cde7e1",
+    "tests/drafts.test.js": "7a186982a6ae59af971c3883df923aaf5f71e2f836e7f8ec1763b370ecf2edee",
+    "tests/network.test.js": "d7a65195afc84c780cdd0ef7b69fce4242b330d815ad844ab34a6f03a8cc6e50",
+    "tests/overlay.test.js": "a674fd3121c6c28944b3ea91057b04e8958f22977b5e0b4476ce9d58aad04c8c",
+    "tests/security.test.js": "22b8b800e2e804ae851dedddc92e42908f343d83d625cec0620cf832c62ae65e",
+    "tests/sharing.test.js": "da03f893cea3971b129d74f1c8743bbd26c14a326353d5e5d26137795b005d8d",
+    "tests/snapshot.test.js": "0ccb103b1d59864913df6c3598360122b63f35b5f14a661acf7b4bd267cf9a02",
+    "tests/storage.test.js": "a68a9846432196b09945201f7ce63bb089a27682bfbfb262132a164748f31fc2"
+  },
+  "storage": [
+    {
+      "file": "src/app.js",
+      "key": "draft"
+    },
+    {
+      "file": "src/apptron-host.js",
+      "key": "apptron:browser-id"
+    },
+    {
+      "file": "src/apptron-host.js",
+      "key": "apptron:browser-id"
+    },
+    {
+      "file": "tests/browser/boot.spec.cjs",
+      "key": "security-canary"
+    },
+    {
+      "file": "tests/browser/editor.spec.cjs",
+      "key": "test:publish"
+    },
+    {
+      "file": "tests/browser/editor.spec.cjs",
+      "key": "test:publish"
+    },
+    {
+      "file": "tests/browser/editor.spec.cjs",
+      "key": "test:publish"
+    },
+    {
+      "file": "tests/browser/isolation.spec.cjs",
+      "key": "apptron:oauth:sentinel"
+    },
+    {
+      "file": "tests/browser/isolation.spec.cjs",
+      "key": "apptron:oauth:sentinel"
+    },
+    {
+      "file": "tests/browser/security.spec.cjs",
+      "key": "apptron:draft"
+    },
+    {
+      "file": "tests/browser/security.spec.cjs",
+      "key": "apptron:draft"
+    },
+    {
+      "file": "tests/browser/security.spec.cjs",
+      "key": "apptron:draft"
+    },
+    {
+      "file": "tests/browser/security.spec.cjs",
+      "key": "apptron:draft"
+    },
+    {
+      "file": "tests/browser/security.spec.cjs",
+      "key": "apptron:relay"
+    },
+    {
+      "file": "tests/browser/security.spec.cjs",
+      "key": "apptron:draft"
+    },
+    {
+      "file": "tests/browser/security.spec.cjs",
+      "key": "apptron:draft"
+    },
+    {
+      "file": "tests/drafts.test.js",
+      "key": "work"
+    },
+    {
+      "file": "tests/drafts.test.js",
+      "key": "work"
+    },
+    {
+      "file": "tests/drafts.test.js",
+      "key": "work"
+    },
+    {
+      "file": "tests/drafts.test.js",
+      "key": "work"
+    }
+  ],
+  "caches": [],
+  "references": [
+    {
+      "file": "src/gallery.js",
+      "href": "./?example=${example.id}"
+    },
+    {
+      "file": "tests/sharing.test.js",
+      "href": "https://site.test/apptron/?example=x&network=wss://private&code=secret#old"
+    },
+    {
+      "file": "tests/sharing.test.js",
+      "href": "https://site.test/?compressed=!"
+    }
+  ],
+  "cases": [
+    {
+      "label": "source fragment",
+      "href": "https://curtcox.github.io/apptron/#%23%20apptron%20snapshot%20v1%0A--%20.apptron%2Fenvrc%20--%0Acd%20%2Fproject%0Aecho%0Aecho%20%22Hello%20from%20a%20real%20Linux%20VM.%22%0Aecho%20%22Try%3A%20sh%20hello.sh%22%0Aecho%0A--%20hello.sh%20--%0A%23!%2Fbin%2Fsh%0Aprintf%20'Hello%2C%20%25s!%5Cn'%20%22%24%7B1%3A-Apptron%7D%22%0Aprintf%20'Kernel%3A%20'%3B%20uname%20-sr%0Aprintf%20'Project%20files%3A%5Cn'%3B%20ls%20-la%20%2Fproject%0A",
+      "kind": "source",
+      "src": "# apptron snapshot v1\n-- .apptron/envrc --\ncd /project\necho\necho \"Hello from a real Linux VM.\"\necho \"Try: sh hello.sh\"\necho\n-- hello.sh --\n#!/bin/sh\nprintf 'Hello, %s!\\n' \"${1:-Apptron}\"\nprintf 'Kernel: '; uname -sr\nprintf 'Project files:\\n'; ls -la /project\n"
+    },
+    {
+      "label": "compressed query",
+      "href": "https://curtcox.github.io/apptron/?compressed=MQAghgDhAuBOD2A7EBnRkUAt7RANwEYAoAWhJADpIYFEB6AU0T1gGMQyjWATEOiBACsGraERHZxrbCABEACQYAbJfBAAzBAFtwIWAzBKQAGQCWiAK4APEADUAshVlSZsgCqwAngC5UmEJjKqhRYzhLwpOSBKvAh-pzAAIR0AEbmdFhEAubQ6iAA5IoxADQgAKQoiQA6iPlyACQA3gTeJACCUHBIAL7O2Yi5BQDSDLCIyr75ANwgFuhaDBwosFmwOXn5AApCIrjqpkoMKN410yBKKBxKYHwC8MKiREA",
+      "kind": "source",
+      "src": "# apptron snapshot v1\n-- .apptron/envrc --\ncd /project\necho\necho \"Hello from a real Linux VM.\"\necho \"Try: sh hello.sh\"\necho\n-- hello.sh --\n#!/bin/sh\nprintf 'Hello, %s!\\n' \"${1:-Apptron}\"\nprintf 'Kernel: '; uname -sr\nprintf 'Project files:\\n'; ls -la /project\n"
+    },
+    {
+      "label": "document query",
+      "href": "https://curtcox.github.io/apptron/?doc=N4IgZg9gTgtghgFxALhACzgZzQIwJYB2AtACZ5wDmUcMIANCAG4CmUmeEBKAjAwgJ4AHZihBxBghFE70QmKAGNRAYgAE4ydIKrMBcdggJVjbgB1iRVQDoNUzgHpmBRotVEi5hSVX3B0gFbMCgjmQWgQoQrhqqYgABLMADaJEKpg0jDqqlDMcImqADKEAK4AHqoAagCyVrGR0bEAKlD8yDpoqmhJKVbYdQRhERad3RC9He7mygCE9vgE9n0EfoQIYKoA5AnJEHSqAKSY06bmGzEgACTA3MhEAIISdgQAvv0rBGubANKsA4ltGwA3KpinoYMw3PJzO9PhsAAoBIJGMB4RLMTDIE4EIGqRKYNyJOA+PwQQLBcwgZ5AA",
+      "kind": "source",
+      "raw": "{\"format\":\"hashbin-diagram\",\"version\":1,\"type\":\"apptron\",\"src\":\"# apptron snapshot v1\\n-- .apptron/envrc --\\ncd /project\\necho\\necho \\\"Hello from a real Linux VM.\\\"\\necho \\\"Try: sh hello.sh\\\"\\necho\\n-- hello.sh --\\n#!/bin/sh\\nprintf 'Hello, %s!\\\\n' \\\"${1:-Apptron}\\\"\\nprintf 'Kernel: '; uname -sr\\nprintf 'Project files:\\\\n'; ls -la /project\\n\"}"
+    },
+    {
+      "label": "document fragment",
+      "href": "https://curtcox.github.io/apptron/#%7B%22format%22%3A%22hashbin-diagram%22%2C%22version%22%3A1%2C%22type%22%3A%22apptron%22%2C%22src%22%3A%22%23%20apptron%20snapshot%20v1%5Cn--%20.apptron%2Fenvrc%20--%5Cncd%20%2Fproject%5Cnecho%5Cnecho%20%5C%22Hello%20from%20a%20real%20Linux%20VM.%5C%22%5Cnecho%20%5C%22Try%3A%20sh%20hello.sh%5C%22%5Cnecho%5Cn--%20hello.sh%20--%5Cn%23!%2Fbin%2Fsh%5Cnprintf%20'Hello%2C%20%25s!%5C%5Cn'%20%5C%22%24%7B1%3A-Apptron%7D%5C%22%5Cnprintf%20'Kernel%3A%20'%3B%20uname%20-sr%5Cnprintf%20'Project%20files%3A%5C%5Cn'%3B%20ls%20-la%20%2Fproject%5Cn%22%7D",
+      "kind": "source",
+      "raw": "{\"format\":\"hashbin-diagram\",\"version\":1,\"type\":\"apptron\",\"src\":\"# apptron snapshot v1\\n-- .apptron/envrc --\\ncd /project\\necho\\necho \\\"Hello from a real Linux VM.\\\"\\necho \\\"Try: sh hello.sh\\\"\\necho\\n-- hello.sh --\\n#!/bin/sh\\nprintf 'Hello, %s!\\\\n' \\\"${1:-Apptron}\\\"\\nprintf 'Kernel: '; uname -sr\\nprintf 'Project files:\\\\n'; ls -la /project\\n\"}"
+    },
+    {
+      "label": "example",
+      "href": "https://curtcox.github.io/apptron/?example=hello-shell",
+      "kind": "example",
+      "id": "hello-shell"
+    },
+    {
+      "label": "CID",
+      "href": "https://curtcox.github.io/apptron/#AAAAAAEDXGdzis84oNppVw5UG4wbz_hMa1LlgemIfWx4jHZ65L1Uyntl5c13PjxGMq0ML6rEqZTO0LoT6jmrPGZ_Fg3mFQ",
+      "kind": "cid",
+      "cid": "AAAAAAEDXGdzis84oNppVw5UG4wbz_hMa1LlgemIfWx4jHZ65L1Uyntl5c13PjxGMq0ML6rEqZTO0LoT6jmrPGZ_Fg3mFQ"
+    }
+  ]
+}

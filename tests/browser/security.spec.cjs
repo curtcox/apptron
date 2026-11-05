@@ -1,5 +1,6 @@
 const {createHash}=require('node:crypto');
 const {test,expect}=require('@playwright/test');
+async function more(page){if(!await page.locator('#fk-more-drawer').isVisible())await page.click('#more-toggle');}
 async function ready(page,url='./'){await page.goto(url);await page.waitForFunction(()=>window.ApptronOnline);await page.evaluate(()=>ApptronOnline.initialized);}
 test('T3 path-scoped VM CSP blocks data scripts and guest data URLs',async({page})=>{
  await ready(page);
@@ -65,13 +66,13 @@ test('unsupported credential-vault configuration disables account actions',async
 test('network permission is snapshot scoped even after saving a relay, and revoke stops the VM',async({page})=>{
  await ready(page);
  await page.evaluate(()=>{ApptronOnline.host.run=async function(source,{networkGrant}){this.networkGrants.resolve(networkGrant,source,this.lock.commit);this.running=true;this.frame=document.createElement('iframe');document.querySelector('#terminal').replaceChildren(this.frame)}});
- await page.locator('.more summary').click();await page.locator('#network-open').click();await page.locator('#relay-url').fill('wss://relay.example/x/net');await page.locator('#network-save').click();
+ await more(page);await page.locator('#network-open').click();await page.locator('#relay-url').fill('wss://relay.example/x/net');await page.locator('#network-save').click();
  let prompts=0;page.on('dialog',async dialog=>{prompts++;await dialog.accept()});
  await page.locator('#run').click();await expect(page.locator('#terminal iframe')).toHaveCount(1);expect(prompts).toBe(1);
  await page.locator('#run').click();expect(prompts).toBe(1);
  await page.evaluate(()=>ApptronOnline.editor.setValue(ApptronOnline.getSource()+'# changed\n'));
  await page.locator('#run').click();expect(prompts).toBe(2);
- await page.locator('.more summary').click();await page.locator('#network-open').click();await page.locator('#network-revoke').click();
+ await more(page);await page.locator('#network-open').click();await page.locator('#network-revoke').click();
  await expect(page.locator('#terminal iframe')).toHaveCount(0);await expect(page.locator('#status')).toContainText('grants revoked');
  await page.locator('#run').click();expect(prompts).toBe(3);
 });

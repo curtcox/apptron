@@ -1,0 +1,91 @@
+{
+  "prefix": "apptron-offline",
+  "files": [
+    "index.html",
+    "gallery.html",
+    "docs.html",
+    "favicon.svg",
+    "deployment-config.js",
+    "fragment-kit.config.json",
+    "runtime.lock",
+    "data-sw.js",
+    "src",
+    "vendor/ace",
+    "vendor/fragment-kit-v0.3.4/src",
+    "vendor/fragment-kit-v0.3.4/vendor",
+    "examples",
+    "manifest.webmanifest",
+    "gallery/covers",
+    "runtime-assets.json",
+    "vm.html"
+  ],
+  "metadata": {
+    "runtime": {
+      "commit": "c4cb2dba29dd245638b55674f6d38ea9cf97a92b",
+      "release": "runtime-c4cb2dba29dd245638b55674f6d38ea9cf97a92b-ee604c1e18d5",
+      "manifestSha256": "99837d7e94a7f8900124286e8b97442efa6b01e905527c87c9f19d437393ed1b",
+      "files": {
+        "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/idbfs.js": {
+          "sha256": "b272747060fb15e47e1b21c355e16c36259b6dde3df23083320ebb66e54aa0db",
+          "size": 40356
+        },
+        "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/overlays/c.tar.gz": {
+          "sha256": "c238d5461fd1c1b75ff0361f14ef57c7bc645ee5ebb540c72c659fbb9a668426",
+          "size": 95761415
+        },
+        "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/overlays/fun.tar.gz": {
+          "sha256": "744ae91d31bc66ac3a72db5ea61b4e59d1e5d3a7e2caba080031d5086ac4ef02",
+          "size": 9713369
+        },
+        "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/overlays/node.tar.gz": {
+          "sha256": "04e485cd75f84e2cac8c750662f08c6a2356c7b2d2307e5dd8411b8ef1f9150b",
+          "size": 27390682
+        },
+        "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/overlays/python.tar.gz": {
+          "sha256": "3b33bc773c9812ba8a3f492c128d232e7ffeca545a3f0e15b75908e915388ffa",
+          "size": 15411935
+        },
+        "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/v86-page.js": {
+          "sha256": "1f967a18b746a9dbc24acd3acf4a4b878b5094d3b743364fabffb79d2d17f995",
+          "size": 388527
+        },
+        "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/wanix.js": {
+          "sha256": "5c7cbbd4981192cbba633976cc2f81f9538e0091d7bd625a1aba075d0a223739",
+          "size": 299236
+        },
+        "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/wanix.min.js": {
+          "sha256": "ff7eb414914a1ff973ad000fee5a1c56232bbbc253a1c20e642b2d3ab5838eeb",
+          "size": 133993
+        },
+        "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/wasi/lib.js": {
+          "sha256": "c039393b963519ec5932a415196a1e13a610a4617cb215dc74f34e27b8d20dbd",
+          "size": 273523
+        },
+        "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/wasm_exec.go.js": {
+          "sha256": "a7e448a62fdf7fd0ab5c67b503e94c7bff70bea43ba90650171ec8bb01a1c9cb",
+          "size": 16701
+        },
+        "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/wasm_exec.tinygo.js": {
+          "sha256": "098c5150bd86a207e02abd1d71d64411f7a9e913878064a2ae968fdbccac8f7f",
+          "size": 16481
+        },
+        "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/xterm-5.3.0.min.css": {
+          "sha256": "d087ab26b52500f26578183d3d17252dabb2a7bde8f3112c85314c148efc4f8c",
+          "size": 2621
+        },
+        "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/xterm-5.3.0.min.js": {
+          "sha256": "167c83344de426e7a1834cb7ca1c3e2ab53621f622dade68b500e4e1cf445fcf",
+          "size": 283632
+        },
+        "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/xterm-fit-0.8.0.min.js": {
+          "sha256": "937c2c356253428b630f5d4be7c3a0bb1bc4144f12830287561e04a6dc0c0ba5",
+          "size": 1745
+        },
+        "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/runtime.json": {
+          "sha256": "99837d7e94a7f8900124286e8b97442efa6b01e905527c87c9f19d437393ed1b",
+          "size": 3641
+        }
+      }
+    }
+  }
+}

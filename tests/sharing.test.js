@@ -31,17 +31,21 @@ test('HashBin Publish saves snapshots and gzip overlays with the pinned SDK and 
  assert.equal((await store.publish(payload,{src})).cid,cidOf(payload));assert.equal(calls[0].options.contentType,'application/json');assert.deepEqual(calls[0].options.clientState,{snapshot:{src},overlay:false});
  assert.equal((await store.publish(overlay,{src},true)).cid,cidOf(overlay));assert.equal(calls[1].options.contentType,'application/gzip');assert.deepEqual([...calls[1].bytes],[31,139,8]);
  store.client.publish=async()=>({cid:cidOf(payload+' ')});await assert.rejects(store.publish(payload,{src}),/does not match|CID/);
- assert.match(require('node:fs').readFileSync(new URL('../src/hashbin.js',import.meta.url),'utf8'),/hashbin\.org\/sdk\/v0\.3\.0\/hashbin\.js/);
+ assert.equal('sha384-'+require('node:crypto').createHash('sha384').update(require('node:fs').readFileSync(new URL('../vendor/fragment-kit-v0.3.4/vendor/hashbin-sdk-v0.4.0.mjs',import.meta.url))).digest('base64'),'sha384-zzmaXw5svWRp0YF//G5ytyeqEowixccM/hHVDth46FnGrIlPS7fPki5vbhv+bWCr');
 });
-test('isolated editors save through a redirect that restores the snapshot after approval or cancellation',async()=>{
- const transactionStorage=memoryStore(),payload=HashBinDocuments.serialize({src});let mode,outcome='approve';
- const store=new HashBinStore({clientId:'registered',transactionStorage,loadSDK:async()=>({HashBinClient:class{publish(_bytes,options){mode=options.mode;return Promise.resolve({redirected:true});}async handlePublishCallback(){if(outcome!=='approve')throw Object.assign(new Error('access_denied'),{clientState:{snapshot:{src},overlay:true}});return {cid:cidOf(payload),clientState:{snapshot:{src},overlay:true}};}}})});
+test('isolated editors save through a redirect that verifies original binary bytes and restores the snapshot',async()=>{
+ const transactionStorage=memoryStore(),payload=new Uint8Array([31,139,8]);let mode,outcome='approve';
+ const store=new HashBinStore({clientId:'registered',transactionStorage,loadSDK:async()=>({HashBinClient:class{
+  constructor(options){this.storage=options.transactionStorage;}
+  publish(_bytes,options){mode=options.mode;return Promise.resolve({redirected:true});}
+  async handlePublishCallback(){this.storage.removeItem('hashbin:publish:registered:s');if(outcome!=='approve')throw Object.assign(new Error('access_denied'),{clientState:{snapshot:{src},overlay:true}});return{cid:cidOf(payload),clientState:{snapshot:{src},overlay:true}};}
+ }})});
+ const seed=()=>store.transactionStorage.setItem('hashbin:publish:registered:s',JSON.stringify({bytes:Buffer.from(payload).toString('base64url'),clientState:{snapshot:{src},overlay:true},createdAt:Date.now()}));
  await store.init();globalThis.crossOriginIsolated=true;
  try{assert.deepEqual(await store.publish(payload,{src},true),{redirected:true});assert.equal(mode,'redirect');}finally{delete globalThis.crossOriginIsolated;}
- assert.equal(await store.published('#'+cidOf('x')),null);
+ assert.equal(await store.published('#'+cidOf('x')),null);seed();
  assert.deepEqual(await store.published('#hashbin_publish=s&cid=x'),{cid:cidOf(payload),snapshot:{src},overlay:true});
- await store.publish(payload,{src},true);outcome='cancel';
- assert.deepEqual(await store.published('#hashbin_publish=s&error=access_denied'),{error:'The save was cancelled on HashBin.',snapshot:{src},overlay:true});assert.equal(transactionStorage.data.size,0);
+ outcome='cancel';seed();assert.deepEqual(await store.published('#hashbin_publish=s&error=access_denied'),{error:'The save was cancelled on HashBin.',snapshot:{src},overlay:true});assert.equal(transactionStorage.data.size,0);
 });
 test('tokens from an earlier OAuth flow are revoked server-side before they are cleared',async()=>{
  const storage=memoryStore();let loaded=0,revoked=0;

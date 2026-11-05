@@ -28,7 +28,7 @@ test('T2 isolated VM cannot access editor assets; capture, reload, persistence a
  expect(await page.evaluate(()=>{try{return !!ApptronOnline.host.frame.contentWindow.apptron}catch{return false}})).toBe(false);
  await page.evaluate(()=>ApptronOnline.host.sendKey("printf 'isolated capture\\n' > isolated.txt; echo home > /home/guest/private\r"));
  await expect.poll(()=>frame.evaluate(()=>apptron.instance.readText('project/isolated.txt').catch(()=>'')),{timeout:15000}).toContain('isolated capture');
- await page.locator('#capture').click();await expect(page.locator('#status')).toContainText('Project files captured',{timeout:20000});expect(await page.evaluate(()=>ApptronOnline.getSource())).toContain('isolated capture');
+ await page.click('#more-toggle');await page.locator('#capture').click();await expect(page.locator('#status')).toContainText('Project files captured',{timeout:20000});expect(await page.evaluate(()=>ApptronOnline.getSource())).toContain('isolated capture');
  const oldSession=await page.evaluate(()=>ApptronOnline.host.session);
  await frame.evaluate(()=>location.reload());await expect.poll(()=>page.evaluate(old=>ApptronOnline.host.session!==old,oldSession)).toBe(true);await expect.poll(()=>page.evaluate(()=>ApptronOnline.host.running),{timeout:180000}).toBe(true);
  frame=page.frames().find(frame=>frame.url().startsWith(vmURL));await expect.poll(()=>text(frame),{timeout:90000}).toContain('ISOLATED_VM_READY');expect(await frame.evaluate(()=>apptron.instance.readText('project/isolated.txt'))).toContain('isolated capture');

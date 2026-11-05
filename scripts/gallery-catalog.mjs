@@ -1,0 +1,3 @@
+import fs from'node:fs/promises';import{examples}from'../src/examples.js';const catalog=await Promise.all(examples.map(async example=>({...example,tags:[example.language,...example.needsRelay?['Needs relay']:[]],document:{src:await fs.readFile('examples/'+example.id+'.txtar','utf8')}})));
+const source='// Generated from the app-owned examples.\nexport const catalog='+JSON.stringify(catalog,null,2)+';\n';
+if(process.argv.includes('--check')){if(await fs.readFile('src/gallery-catalog.js','utf8')!==source)throw Error('Gallery catalog is stale.');}else await fs.writeFile('src/gallery-catalog.js',source);console.log(catalog.length+' gallery sources current.');
