@@ -1,5 +1,14 @@
 import{test}from'@playwright/test';
 test.setTimeout(120000);
+test.beforeEach(async({page},info)=>{
+ if(info.project.name!=='firefox')return;
+ await page.addInitScript(()=>{globalThis.__policyViolations=[];addEventListener('securitypolicyviolation',event=>__policyViolations.push({directive:event.effectiveDirective,blocked:event.blockedURI,source:event.sourceFile}));});
+ page.on('console',message=>{if(message.type()==='error')console.log('Firefox console: '+message.text());});
+ page.on('pageerror',error=>console.log('Firefox page error: '+error.message));
+});
+test.afterEach(async({page},info)=>{
+ if(info.project.name==='firefox'&&info.status!==info.expectedStatus)console.log('Firefox offline diagnostics: '+JSON.stringify(await page.evaluate(()=>({url:location.href,policy:[...document.querySelectorAll('meta[http-equiv]')].map(node=>node.content),violations:globalThis.__policyViolations})).catch(()=>null)));
+});
 export default{
  installHashBinMock:async(context,source)=>context.route('**/vendor/hashbin-sdk-v0.4.0.mjs',route=>route.fulfill({contentType:'text/javascript',body:source.replace('new TextEncoder().encode(text)', '(text instanceof Uint8Array ? text : new TextEncoder().encode(text))')})),
  source:text=>'# apptron snapshot v1\n-- note.txt --\n'+text+'\n',
