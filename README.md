@@ -152,3 +152,5 @@ media still comes from the original real-VM producer in scripts/render-gallery.c
 
 The recovery deployment remains owner-gated. The proposed canonical origin and
 HashBin client registration require owner setup; no new registration is implied.
+
+Canonical registration (2026-11-05): `app_4988e882-b216-42ef-8d95-9f1747c6b55e`, with the sole return URL `https://apptron.hashbin.page/`. The GitHub Pages recovery copy preserves old links and drafts; Publish approval is available from the canonical site.

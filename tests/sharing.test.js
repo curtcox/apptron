@@ -24,7 +24,7 @@ test('CID parsing handles embedded short documents and links',async()=>{
 function cidOf(data){const bytes=Buffer.from(data),size=Buffer.alloc(6);size.writeUIntBE(bytes.length,0,6);return size.toString('base64url')+(bytes.length<=64?bytes:require('node:crypto').createHash('sha512').update(bytes).digest()).toString('base64url');}
 const memoryStore=()=>{const data=new Map();return {data,getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)};};
 test('HashBin Publish saves snapshots and gzip overlays with the pinned SDK and verifies returned CIDs',async()=>{
- await assert.rejects(()=>new HashBinStore().init(),/client ID/);
+ await assert.rejects(()=>new HashBinStore({clientId:''}).init(),/client ID/);
  const calls=[];const store=new HashBinStore({clientId:'registered',loadSDK:async()=>({HashBinClient:class{publish(bytes,options){calls.push({bytes,options});return Promise.resolve({cid:cidOf(bytes)});}}})});
  const payload=HashBinDocuments.serialize({src}),overlay=new Uint8Array([31,139,8]);
  await assert.rejects(store.publish(payload,{src}),/still loading/);await store.init();

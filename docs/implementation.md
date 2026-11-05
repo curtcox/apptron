@@ -171,3 +171,5 @@ still requires the owner configuration and response headers in deployment.md.
 Shared CI and Pages workflows are pinned to immutable v2, with kit v0.3.4 supplied
 explicitly. Browser jobs use the matching Playwright browsers on Ubuntu 24.04;
 the actual VM boot/isolation job retains its matching container and owner gate.
+
+Canonical registration (2026-11-05): `app_4988e882-b216-42ef-8d95-9f1747c6b55e`, with the sole return URL `https://apptron.hashbin.page/`. The GitHub Pages recovery copy preserves old links and drafts; Publish approval is available from the canonical site.
