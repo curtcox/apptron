@@ -21,8 +21,8 @@ test('HashBin loads apptron documents and discards stale loads after an editor c
  let release;const gate=new Promise(r=>release=r);await page.unroute('https://256t.us/**');await page.route('https://256t.us/**',async route=>{await gate;await route.fulfill({body:payload,contentType:'application/json'});});
  await page.evaluate(cid=>{window.pendingLoad=ApptronOnline.panel.load(cid)},cid);await page.evaluate(()=>ApptronOnline.editor.setValue('# apptron snapshot v1\n-- mine --\nkeep me\n'));release();await page.evaluate(()=>pendingLoad);expect(await page.evaluate(()=>ApptronOnline.getSource())).toContain('keep me');
 });
-test('HashBin save explains the missing public client registration',async({page})=>{
- await ready(page);await more(page);await page.locator('#hashbin-save').click();await expect(page.locator('#hashbin-message')).toContainText('registered client ID');await expect(page.locator('#hashbin-confirm')).toBeDisabled();
+test('HashBin save prepares a registered approval without spending',async({page})=>{
+ await ready(page);await more(page);await page.locator('#hashbin-save').click();await expect(page.locator('#hashbin-message')).toContainText('HashBin');await expect(page.locator('#hashbin-confirm')).toBeEnabled();
 });
 test('layout fits, phone view toggles, and network setting stays out of share links',async({page},testInfo)=>{
  await ready(page);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
@@ -36,7 +36,7 @@ test('an isolated editor saves through a HashBin Publish redirect and restores t
   publish(bytes,{mode,contentType,clientState}){return window.__publishCID(Array.from(bytes)).then(cid=>{sessionStorage.setItem('test:publish',JSON.stringify({mode,contentType,clientState,cid}));
    location.href='https://hashbin.org/publish?return='+encodeURIComponent(this.o.redirectUri+'#hashbin_publish=t&cid='+cid);return Promise.resolve({redirected:true})})}
   async handlePublishCallback(){return {cid:JSON.parse(sessionStorage.getItem('test:publish')).cid,clientState:JSON.parse(sessionStorage.getItem('test:publish')).clientState}}}`;
- await page.route('**/apptron/',async route=>{const response=await route.fetch();route.fulfill({response,body:(await response.text()).replace('name="hashbin-client-id" content=""','name="hashbin-client-id" content="test-client"')});});
+ await page.route('**/apptron/',async route=>{const response=await route.fetch();route.fulfill({response,body:(await response.text()).replace(/name="hashbin-client-id" content="[^"]*"/,'name="hashbin-client-id" content="test-client"')});});
  // HashBin Publish approves on its own page and redirects back, so the editor loads afresh.
  await page.route('https://hashbin.org/publish?**',route=>route.fulfill({contentType:'text/html',body:'<script>location.replace(new URL(location.href).searchParams.get("return"))</script>'}));
  await page.route('**/vendor/hashbin-sdk-v0.4.0.mjs',route=>route.fulfill({body:sdk,contentType:'text/javascript',headers:{'Access-Control-Allow-Origin':'*'}}));

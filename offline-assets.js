@@ -68,7 +68,7 @@
     }
   },
   "prefix": "apptron-offline",
-  "version": "apptron-offline-bd8da5295f658d0c",
+  "version": "apptron-offline-3b1db95474e3b775",
   "assets": [
     "data-sw.js",
     "deployment-config.js",
@@ -242,7 +242,7 @@
     "gallery/covers/node.png": "d7b57ecf0a77b96ec71e2860de04823d586130f271fb12cde0b33c0b8760ef51",
     "gallery/covers/python.png": "cb2bf3a8a60b701c71e5d77151b5b4f1065824c14f3060ffd17d619d8e11298d",
     "gallery/covers/wasm.png": "a5d479f5c362080268e7a967a765fd7e5ca25dee6e4b0201dccd503735791e9b",
-    "index.html": "2355812037fc2336e1408784a26aedd54bc43ae6ce264b248e8440bfe895b4fb",
+    "index.html": "4ae370145319b7e3a641bb4e42289afb627fba60a71d5c7a0a092b4b86995af8",
     "manifest.webmanifest": "edb2a98262f261840ddefcbbe1774d2a35759e2d65909d7bc87bebc19ecd52ed",
     "runtime-assets.json": "33eb005f7d2ff34a92af331456d1ef1d11164948c5df4d0b6f5d1b5cfa9240df",
     "runtime.lock": "dfe0cf2338afcf9b0d8d5f41b1bc3da294b7a344827ce230baeca1e4b7ffae2b",
