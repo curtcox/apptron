@@ -28,5 +28,5 @@ jobs:
         import {execFileSync} from 'node:child_process';
         const vmURL = ${{ toJSON(vars.APPTRON_VM_URL) }};
         const editorOrigin = ${{ toJSON(vars.APPTRON_EDITOR_ORIGIN) }};
-        execFileSync('npm',['run','build'],{stdio:'inherit',env:{...process.env,APPTRON_VM_URL:vmURL,APPTRON_EDITOR_ORIGIN:editorOrigin}});
+        execFileSync('npm',['run','build'],{stdio:'inherit',env:{...process.env,APPTRON_VM_URL:vmURL ?? '',APPTRON_EDITOR_ORIGIN:editorOrigin ?? ''}});
         JS
