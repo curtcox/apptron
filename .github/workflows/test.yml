@@ -53,7 +53,7 @@ jobs:
         run: |
           node scripts/pin-runtime-assets.mjs
           node scripts/update-offline.mjs
-      - run: APPTRON_BOOT=1 scripts/test-browser-container.sh tests/browser/boot.spec.cjs --project=chromium
+      - run: APPTRON_BOOT=1 scripts/test-browser-container.sh tests/browser/boot.spec.cjs --project=chromium --max-failures=1
       - name: Prepare paired artifacts for isolation checks
         run: |
           npm run build -- --role vm --editor-origin http://127.0.0.1:4173 --vm-url http://127.0.0.1:4174/apptron/vm.html

@@ -1,7 +1,8 @@
 const { test, expect } = require('@playwright/test');
 const { readFileSync } = require('node:fs');
+const {initialize}=require('./startup.cjs');
 test.beforeEach(async({page},testInfo)=>test.skip(process.env.APPTRON_BOOT!=='1'||testInfo.project.name!=='chromium','Real VM boot runs explicitly in Chromium.'));
-async function boot(page,source){await page.goto('./');await page.waitForFunction(()=>crossOriginIsolated&&window.ApptronOnline);await page.evaluate(()=>ApptronOnline.initialized);if(source)await page.evaluate(s=>ApptronOnline.setSource(s),source);await page.locator('#run').click();await expect(page.locator('#run')).toBeEnabled({timeout:180000}).catch(async error=>{console.log('Boot status: '+await page.locator('#status').textContent());throw error;});await expect(page.locator('#status')).toContainText('Running ·');}
+async function boot(page,source){await initialize(page);if(source)await page.evaluate(s=>ApptronOnline.setSource(s),source);await page.locator('#run').click();await expect(page.locator('#run')).toBeEnabled({timeout:180000}).catch(async error=>{console.log('Boot status: '+await page.locator('#status').textContent());throw error;});await expect(page.locator('#status')).toContainText('Running ·');}
 async function terminal(page){return page.locator('#terminal iframe').contentFrame().locator('.xterm');}
 async function text(page){return page.evaluate(()=>{const b=ApptronOnline.host.frame.contentWindow.apptron.terminal.buffer.active;return Array.from({length:b.length},(_,i)=>b.getLine(i)?.translateToString()).join('\n')});}
 test('boots a real shell from a Pages subpath, syncs a VM edit and captures it',async({page})=>{
