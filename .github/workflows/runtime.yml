@@ -68,7 +68,7 @@ jobs:
           node scripts/lock-runtime.mjs "runtime/$commit" .build/runtime.tar.gz
           cp "runtime/$commit/runtime.json" .build/runtime.json
           cp runtime.lock .build/runtime.lock
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: steps.release.outputs.exists != 'true'
         with:
           name: runtime
