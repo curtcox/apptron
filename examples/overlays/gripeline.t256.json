@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "repo": "curtcox/256t.org",
+  "release": "t256-v0.1.0",
+  "asset": "t256-linux-386",
+  "size": 6733984,
+  "sha256": "5544a75a4d920001c5f84428bc66e1444cc01e05f6ff683840741a4b5fd2b565",
+  "sumsSha256": "34308f38bf869f36b84ca16b485335dbfd0250c1d240689bd3e743013dbef609"
+}

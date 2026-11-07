@@ -110,3 +110,10 @@ for(const [name,source]of [['shell',undefined],['Python overlay',readFileSync('e
  await page.reload();await page.waitForFunction(()=>window.ApptronOnline);await page.evaluate(()=>ApptronOnline.initialized);
  await context.setOffline(true);await page.locator('#run').click();await expect(page.locator('#run')).toBeEnabled({timeout:180000});await expect(page.locator('#status')).toContainText('Running ·');await expect.poll(()=>text(page),{timeout:90000}).toContain('guest:/project');
 });
+
+test('gripeline dot/modl twins run identically with an offline t256 source',async({page})=>{
+ test.setTimeout(240000);await boot(page,readFileSync('examples/gripeline.txtar','utf8'));
+ await expect.poll(()=>text(page),{timeout:90000}).toContain('Try: python3 gripeline.py run pipeline.modl');
+ await page.evaluate(()=>ApptronOnline.host.sendKey('python3 gripeline.py build pipeline.dot > dot.sh && python3 gripeline.py build pipeline.modl > modl.sh && cmp dot.sh modl.sh && printf "GRIPELINE_OK=" && python3 gripeline.py run pipeline.modl\r'));
+ await expect.poll(()=>text(page),{timeout:90000}).toContain('GRIPELINE_OK=6');
+});

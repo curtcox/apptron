@@ -66,6 +66,8 @@ jobs:
           commit=$(git -C upstream/apptron rev-parse HEAD)
           tar -czf .build/runtime.tar.gz -C "runtime/$commit" .
           node scripts/lock-runtime.mjs "runtime/$commit" .build/runtime.tar.gz
+          node scripts/pin-runtime-assets.mjs
+          node scripts/update-offline.mjs
           cp "runtime/$commit/runtime.json" .build/runtime.json
           cp runtime.lock .build/runtime.lock
       - uses: actions/upload-artifact@v4
@@ -90,6 +92,6 @@ jobs:
           gh release create "$release" .build/runtime.tar.gz .build/runtime.json .build/runtime.lock --title "$release" --notes 'Pinned Apptron runtime. Boot, Python overlay and offline Go smoke checks passed.'
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add runtime.lock
+          git add runtime.lock runtime-assets.json offline.config.json offline-assets.js
           git diff --cached --quiet || git commit -m 'Lock verified Apptron runtime release'
           git push

@@ -1,4 +1,4 @@
-import { runtimePatches } from './runtime-patches.mjs';
+import { runtimePatches, runtimeBuildInputs } from './runtime-patches.mjs';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { safePath } from '../src/snapshot.js';
@@ -12,7 +12,8 @@ if (manifest.securityVersion !== 1) throw new Error('Runtime is missing the secu
 if (manifest.commit !== lock.commit || manifest.loaderSource !== lock.loaderSource) throw new Error('Runtime source mismatch.');
 const patches = runtimePatches();
 if (JSON.stringify(Object.entries(manifest.patches || {}).sort()) !== JSON.stringify(Object.entries(patches).sort())) throw new Error('Runtime patches differ from this checkout. Build and lock a new runtime release.');
-for (const required of ['wasi/lib.js','idbfs.js','v86-page.js','wasm_exec.go.js','wasm_exec.tinygo.js','xterm-5.3.0.min.css','xterm-5.3.0.min.js','xterm-fit-0.8.0.min.js','sys.tar.gz','wanix.wasm','wanix.min.js','wanix.js','goroot.tar.gz','gocache-386.tar.gz','gocache-wasm.tar.gz','overlays/python.tar.gz','overlays/c.tar.gz','overlays/node.tar.gz','overlays/fun.tar.gz']) if (!manifest.files[required]) throw new Error(`Missing runtime file: ${required}`);
+if (JSON.stringify(manifest.buildInputs) !== JSON.stringify(runtimeBuildInputs())) throw new Error('Runtime build inputs differ from this checkout.');
+for (const required of ['wasi/lib.js','idbfs.js','v86-page.js','wasm_exec.go.js','wasm_exec.tinygo.js','xterm-5.3.0.min.css','xterm-5.3.0.min.js','xterm-fit-0.8.0.min.js','sys.tar.gz','wanix.wasm','wanix.min.js','wanix.js','goroot.tar.gz','gocache-386.tar.gz','gocache-wasm.tar.gz','overlays/gripeline.tar.gz','overlays/python.tar.gz','overlays/c.tar.gz','overlays/node.tar.gz','overlays/fun.tar.gz']) if (!manifest.files[required]) throw new Error(`Missing runtime file: ${required}`);
 for (const [name, expected] of Object.entries(manifest.files)) {
  safePath(name); const actual = readFileSync(`${directory}/${name}`);
  if (actual.length !== expected.size || digest(actual) !== expected.sha256) throw new Error(`Checksum mismatch: ${name}`);

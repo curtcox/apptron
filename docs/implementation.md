@@ -173,3 +173,22 @@ explicitly. Browser jobs use the matching Playwright browsers on Ubuntu 24.04;
 the actual VM boot/isolation job retains its matching container and owner gate.
 
 Canonical registration (2026-11-05): `app_4988e882-b216-42ef-8d95-9f1747c6b55e`, with the sole return URL `https://apptron.hashbin.page/`. The GitHub Pages recovery copy preserves old links and drafts; Publish approval is available from the canonical site.
+
+## gripeline overlay
+
+The gripeline overlay installs bash, Python and coreutils plus the pure-Go
+Linux 386 t256 binary from `t256-v0.1.0`. Its binary and SHA256SUMS file are
+independently pinned in `examples/overlays/gripeline.t256.json`; the build
+rejects mismatched release lists, sizes and bytes before installing t256.
+Snapshots carry the exact gripeline compiler, diagrams and offline t256 store.
+`examples/gripeline.txtar` includes a dot/modl twin and performs only a static
+check on opening; the VM boot test explicitly executes it and expects six bytes.
+The sample is not in the visible gallery until a real VM screenshot is captured.
+
+Runtime release fingerprints now include overlay packages, binary pins and
+build scripts, so changing them cannot silently reuse an earlier release. The
+checked-in lock continues to name the last verified release while a new build
+is pending. `sync-runtime-lock.mjs` selects the new build in CI; after boot
+verification, the Runtime workflow publishes the immutable artifact and updates
+the lock, deferred runtime pins and offline manifest together. Gallery covers
+depend on their actual PNG sources, not unrelated runtime-lock bytes.

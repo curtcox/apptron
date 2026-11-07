@@ -2,7 +2,6 @@
   "dependencies": {
     "src/examples.js": "e17df7c53d78fecc8e52313840e0aa65dafbc79e450715223a1c0e60dee979e4",
     "src/fragment-config.js": "78dcd63ee13469bc820ce2e33544dc605f37947b48d1339e05193d173d41c8c9",
-    "runtime.lock": "dfe0cf2338afcf9b0d8d5f41b1bc3da294b7a344827ce230baeca1e4b7ffae2b",
     "scripts/render-gallery.cjs": "c4968483b19159458bb9080c18e34143e1c65bf5dca1f45d5a093d6462c82cfc",
     "examples/hello-shell.txtar": "d2242f4ade90895bf53224e3068338126cec32f2f094c8099f5ed7de0b72182d",
     "examples/screenshots/hello-shell.png": "a8acb7e96ad6af38ace3c667cea636b73ed48a920f996196b708d72d9b7988eb",
@@ -23,7 +22,7 @@
     "examples/envbuild.txtar": "443c18028093736f3a7b5444c3374492851589d58d825207c08625e92fe533f0",
     "examples/screenshots/envbuild.png": "88b4ea66dd810d2ba7cc44566dbea9de9ebc7bc36d6f6d358494a7b530c62b34"
   },
-  "renderer": "9b6f951fae9a93783d122da4d0753191747177ffd2961812fc52a539e49fe9fa",
+  "renderer": "ea456a6c3d4195efa967e3e11ab7b9d36da47779864746c6f02bfd0d9b6875c7",
   "examples": {
     "hello-shell": {
       "document": "ed6224db60d3044011bb364394b529829992737fe4f1c6335c33043f422adfa2",
