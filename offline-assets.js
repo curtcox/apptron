@@ -2,28 +2,32 @@
 (function (self) { self.OfflineAssets = {
   "runtime": {
     "commit": "c4cb2dba29dd245638b55674f6d38ea9cf97a92b",
-    "release": "runtime-c4cb2dba29dd245638b55674f6d38ea9cf97a92b-ee604c1e18d5",
-    "manifestSha256": "99837d7e94a7f8900124286e8b97442efa6b01e905527c87c9f19d437393ed1b",
+    "release": "runtime-c4cb2dba29dd245638b55674f6d38ea9cf97a92b-44e620378b85",
+    "manifestSha256": "992d08d540dcc52cea2fb80069a96bb6b1af6c6d44c4bd42398dcfced88cf2d6",
     "files": {
       "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/idbfs.js": {
         "sha256": "b272747060fb15e47e1b21c355e16c36259b6dde3df23083320ebb66e54aa0db",
         "size": 40356
       },
       "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/overlays/c.tar.gz": {
-        "sha256": "c238d5461fd1c1b75ff0361f14ef57c7bc645ee5ebb540c72c659fbb9a668426",
-        "size": 95761415
+        "sha256": "87294e58afa5cd8c76796f56201ebc4954d81e3676bc8c74b4f9a553289740e1",
+        "size": 95761363
       },
       "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/overlays/fun.tar.gz": {
-        "sha256": "744ae91d31bc66ac3a72db5ea61b4e59d1e5d3a7e2caba080031d5086ac4ef02",
-        "size": 9713369
+        "sha256": "6754b229689a589c28243651a82f783475a03c88f437bdc683da0ee8ee1d9bae",
+        "size": 9713391
+      },
+      "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/overlays/gripeline.tar.gz": {
+        "sha256": "10534ac52866611131d177a1f789bfc7fc5906de97b4c6342d882b9af44f5002",
+        "size": 19502673
       },
       "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/overlays/node.tar.gz": {
-        "sha256": "04e485cd75f84e2cac8c750662f08c6a2356c7b2d2307e5dd8411b8ef1f9150b",
-        "size": 27390682
+        "sha256": "e656a8b3b79b37d14ef739cc1ed3b8055dfcc775f220c7a741e90a0d72bd8e5d",
+        "size": 27390597
       },
       "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/overlays/python.tar.gz": {
-        "sha256": "3b33bc773c9812ba8a3f492c128d232e7ffeca545a3f0e15b75908e915388ffa",
-        "size": 15411935
+        "sha256": "0055b2f61bcb96a90ca406c16c11b828778fdc6c9b71674c1ab50f5a70528930",
+        "size": 15417612
       },
       "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/v86-page.js": {
         "sha256": "1f967a18b746a9dbc24acd3acf4a4b878b5094d3b743364fabffb79d2d17f995",
@@ -62,13 +66,13 @@
         "size": 1745
       },
       "runtime/c4cb2dba29dd245638b55674f6d38ea9cf97a92b/runtime.json": {
-        "sha256": "99837d7e94a7f8900124286e8b97442efa6b01e905527c87c9f19d437393ed1b",
-        "size": 3641
+        "sha256": "992d08d540dcc52cea2fb80069a96bb6b1af6c6d44c4bd42398dcfced88cf2d6",
+        "size": 5070
       }
     }
   },
   "prefix": "apptron-offline",
-  "version": "apptron-offline-1afa7eada43d19cd",
+  "version": "apptron-offline-cba6f42934ec18ae",
   "assets": [
     "data-sw.js",
     "deployment-config.js",
@@ -93,6 +97,7 @@
     "examples/screenshots/esbuild.png",
     "examples/screenshots/fun.png",
     "examples/screenshots/go-hello.png",
+    "examples/screenshots/gripeline.png",
     "examples/screenshots/hello-shell.png",
     "examples/screenshots/node.png",
     "examples/screenshots/python.png",
@@ -107,6 +112,7 @@
     "gallery/covers/fingerprints.json",
     "gallery/covers/fun.png",
     "gallery/covers/go-hello.png",
+    "gallery/covers/gripeline.png",
     "gallery/covers/hello-shell.png",
     "gallery/covers/node.png",
     "gallery/covers/python.png",
@@ -230,6 +236,7 @@
     "examples/screenshots/esbuild.png": "03c152af35970bca489bdfbb294122c62e962bb492f7ba48aa716af6cfb8eeb3",
     "examples/screenshots/fun.png": "51c3c0def72af95b8e1b4c3f8fe02d6e8db421e57b9ee9da1c7153c61d7b472c",
     "examples/screenshots/go-hello.png": "4a46bec74b91dacbb9c70070351713232e3cc7fcd9a7be6776da31b64f2b9986",
+    "examples/screenshots/gripeline.png": "b6be13a0840cfb1132adec2b87a438f6526b8d8236bfc11749f479bec232eff7",
     "examples/screenshots/hello-shell.png": "a8acb7e96ad6af38ace3c667cea636b73ed48a920f996196b708d72d9b7988eb",
     "examples/screenshots/node.png": "db82c4f435bdb01bc1a9c604f8c9a718ec368938e32f6fa92b419934e27b9e41",
     "examples/screenshots/python.png": "00639d12a23c298ca6f6814aa710876c92dc20c0733c1e546210f5a0d177118c",
@@ -241,17 +248,18 @@
     "gallery/covers/c-make.png": "1bc709f6ae42c3a918b71117cb5d751b8619d80aa5bbea01d82ae47a97ce9119",
     "gallery/covers/envbuild.png": "f2b141046bab7984868a0d27fb69216bae15ac112c078382cccfd1ce7a0787ac",
     "gallery/covers/esbuild.png": "f7275d490b84f6544fc86125cdb0d3cd1b6c09749876e1317d0d8b358539b131",
-    "gallery/covers/fingerprints.json": "717973d0d47bd7c2610510c6adb4d7d485a191ee3b75463323bef69de3393e70",
+    "gallery/covers/fingerprints.json": "d14a705b6f51eeb81f56d5e21911a17edd8719856ffab9fd469ddc8490ecf205",
     "gallery/covers/fun.png": "e2e00242ab4aa2a6755e4a0e19e6f69af6019036575391c4945eee499c47391a",
     "gallery/covers/go-hello.png": "000d818c4986c0455ac5c4056caf5fdc815b1e9d1a4e41d40ed9f997056d3691",
+    "gallery/covers/gripeline.png": "542b6c98a963bbbb0940d64b6773a782424946196ff5ebb6bd94ab7392fc715c",
     "gallery/covers/hello-shell.png": "a478e9e3e7a70ec0f64f88031bc91d8198e0fabaab04ae44390c2e9c0f563046",
     "gallery/covers/node.png": "d7b57ecf0a77b96ec71e2860de04823d586130f271fb12cde0b33c0b8760ef51",
     "gallery/covers/python.png": "cb2bf3a8a60b701c71e5d77151b5b4f1065824c14f3060ffd17d619d8e11298d",
     "gallery/covers/wasm.png": "a5d479f5c362080268e7a967a765fd7e5ca25dee6e4b0201dccd503735791e9b",
     "index.html": "4ae370145319b7e3a641bb4e42289afb627fba60a71d5c7a0a092b4b86995af8",
     "manifest.webmanifest": "edb2a98262f261840ddefcbbe1774d2a35759e2d65909d7bc87bebc19ecd52ed",
-    "runtime-assets.json": "33eb005f7d2ff34a92af331456d1ef1d11164948c5df4d0b6f5d1b5cfa9240df",
-    "runtime.lock": "dfe0cf2338afcf9b0d8d5f41b1bc3da294b7a344827ce230baeca1e4b7ffae2b",
+    "runtime-assets.json": "cf01720a05804b35c1be90bab1a61c8846976f944f77217f3123a6f6fe688e0e",
+    "runtime.lock": "70633f7a0aa650976eb160abc8b74e08d8d62fd96c96a8b02dfa591b3678f8c0",
     "src/app.js": "cb381ca37611c42ca5b293d9e09d27b39c61cff39b2897ea367d2e1eaa4b01c1",
     "src/apptron-host.js": "f000f7b4100955cf4943ead534233dd9d855bbc4a740370819f8142b707ee6ea",
     "src/bridge.js": "881d4a1ba9d1d73bb24ddee8e4f50e1868bcf79c43c4ccdc2c445d4d3a924775",
@@ -261,10 +269,10 @@
     "src/data-sw.js": "a29fe185ba9442afbf46a02f4cf51994c0e9a0f72991d086c9a378c22f21e4ed",
     "src/deployment.js": "39f06bd71519104cd44ceab588812806eef8751a7414a86d07b4e0aa1cb6af9d",
     "src/draft.js": "722cf5423cec2935b6b2586df8264627e1c220bc6124e1fe9c61194b266ae1ee",
-    "src/examples.js": "e17df7c53d78fecc8e52313840e0aa65dafbc79e450715223a1c0e60dee979e4",
+    "src/examples.js": "f7ba92a59717e678756b1249df25569dab78b3dc6fd8a076b4f5504debdfcea7",
     "src/fragment-config.js": "78dcd63ee13469bc820ce2e33544dc605f37947b48d1339e05193d173d41c8c9",
     "src/fragment-ui.css": "2d42478cd7d249519ccc35875ab5aed12a02752ba882a925da671835a6762dd6",
-    "src/gallery-catalog.js": "817f958c4f409a0d743b86ac7e66002deda85691604e59dc70ac2086d60fbb56",
+    "src/gallery-catalog.js": "5dee29ea226c86fc6ff5ca246de86ec3b5f87629808524b675310ba477cd914f",
     "src/gallery-kit.css": "7d49f920688d8aa27a1fdb7175bb4d64821217407d0584a86fb3dffd58d49bb4",
     "src/gallery.css": "e2615ec4a1abab3e8225c873ca3ea672eac84a007f0c3bd3fa21a00714b56918",
     "src/gallery.js": "a7ce2ed86d343d403c21d41166431e09dc94e1b91457098cbdbfa6357d26b2de",

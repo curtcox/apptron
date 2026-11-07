@@ -119,4 +119,5 @@ test('gripeline dot/modl twins run identically with an offline t256 source',asyn
  await expect.poll(()=>text(page),{timeout:90000}).toContain('GRIPELINE_OK=6');
  await page.evaluate(()=>ApptronOnline.host.sendKey('python3 verify_gallery.py\r'));
  await expect.poll(()=>text(page),{timeout:180000}).toContain('PORTABLE_GALLERY_OK');
+ if(process.env.GRIPELINE_GALLERY_SCREENSHOT==='1')await page.screenshot({path:'examples/screenshots/gripeline.png'});
 });

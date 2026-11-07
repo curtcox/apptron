@@ -1,12 +1,14 @@
 {
   "dependencies": {
-    "src/examples.js": "e17df7c53d78fecc8e52313840e0aa65dafbc79e450715223a1c0e60dee979e4",
+    "src/examples.js": "f7ba92a59717e678756b1249df25569dab78b3dc6fd8a076b4f5504debdfcea7",
     "src/fragment-config.js": "78dcd63ee13469bc820ce2e33544dc605f37947b48d1339e05193d173d41c8c9",
     "scripts/render-gallery.cjs": "c4968483b19159458bb9080c18e34143e1c65bf5dca1f45d5a093d6462c82cfc",
     "examples/hello-shell.txtar": "d2242f4ade90895bf53224e3068338126cec32f2f094c8099f5ed7de0b72182d",
     "examples/screenshots/hello-shell.png": "a8acb7e96ad6af38ace3c667cea636b73ed48a920f996196b708d72d9b7988eb",
     "examples/go-hello.txtar": "15a96a50cc72b318be7fd2f504b2e7f7b4f537817ccc62b0b224a296bb155d79",
     "examples/screenshots/go-hello.png": "4a46bec74b91dacbb9c70070351713232e3cc7fcd9a7be6776da31b64f2b9986",
+    "examples/gripeline.txtar": "716efdbcc7a3de5512ebb90c08cb5d9a4de7a6a6f8333a84b909fc533b5166b6",
+    "examples/screenshots/gripeline.png": "b6be13a0840cfb1132adec2b87a438f6526b8d8236bfc11749f479bec232eff7",
     "examples/python.txtar": "03d86a0a804f0eed1a2134ed673b4ad4b27d216b369a0f61fc1e1447a012c170",
     "examples/screenshots/python.png": "00639d12a23c298ca6f6814aa710876c92dc20c0733c1e546210f5a0d177118c",
     "examples/c-make.txtar": "285be5e06ebd37efd68c5ee681438ba7d60aae8d0216bf8df160256bd7f8fd95",
@@ -31,6 +33,10 @@
     "go-hello": {
       "document": "a506c3df77271dcac26686d0777aa199c48417779989fd47ef1a02ca8df36f97",
       "cover": "000d818c4986c0455ac5c4056caf5fdc815b1e9d1a4e41d40ed9f997056d3691"
+    },
+    "gripeline": {
+      "document": "4e34739f04589ee94da39757fa3448f387b38ccf749458957df2d4799c12aee0",
+      "cover": "542b6c98a963bbbb0940d64b6773a782424946196ff5ebb6bd94ab7392fc715c"
     },
     "python": {
       "document": "a83cf67de1346fa3e5c54b06ff32ac45754e31d6bc87f54725baff03b383619b",

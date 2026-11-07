@@ -1,6 +1,7 @@
 export const examples = [
   { id: 'hello-shell', title: 'Hello, Linux', language: 'Shell', description: 'Start with a shell, a file, and a tiny welcome script.' },
   { id: 'go-hello', title: 'A little Go', language: 'Go', description: 'Load the offline Go toolchain and compile your first program.' },
+  { id: 'gripeline', title: 'Draw a pipeline', language: 'gripeline', description: 'Check dot/modl twins and run portable t256 pipelines offline.' },
   { id: 'python', title: 'Python playground', language: 'Python', description: 'A prebuilt Python overlay. No package downloads inside the VM.' },
   { id: 'c-make', title: 'C, meet Make', language: 'C', description: 'Compile a C program with the offline build tools overlay.' },
   { id: 'node', title: 'Node in a tab', language: 'JavaScript', description: 'Run JavaScript with Node and npm already installed.' },
