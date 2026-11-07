@@ -49,6 +49,10 @@ jobs:
             commit=$(git -C upstream/apptron rev-parse HEAD)
             node scripts/runtime-manifest.mjs "runtime/$commit" --lock
           fi
+      - name: Prepare verified runtime cache metadata for boot checks
+        run: |
+          node scripts/pin-runtime-assets.mjs
+          node scripts/update-offline.mjs
       - run: APPTRON_BOOT=1 scripts/test-browser-container.sh tests/browser/boot.spec.cjs --project=chromium
       - name: Prepare paired artifacts for isolation checks
         run: |

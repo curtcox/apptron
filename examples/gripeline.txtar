@@ -2642,3 +2642,29 @@ if __name__ == "__main__":
     sys.exit(main(sys.argv))
 -- .t256/config.json --
 {"providers":{"local":{"type":"dir","path":"/project/.t256/store","create":true}},"sources":["local"],"destination":"local"}
+-- portable-gallery.json --
+[{"name": "portable-t256-count", "dot": "digraph {\n  graph [gl_requires=\"t256 wc\" gl_env=\"linux macos windows apptron\"];\n  input [shape=note label=\"t256:AAAAAAAGaGVsbG8K\"];\n  count [shape=box label=\"wc -c\"];\n  input -> count;\n}", "modl": "#gl requires t256 wc\n#gl env linux macos windows apptron\ninput hex t256:AAAAAAAGaGVsbG8K\ncount square wc -c\ninput -> count", "stdout": "6"}, {"name": "portable-t256-save", "dot": "digraph {\n  graph [gl_requires=\"printf t256\" gl_env=\"linux macos windows apptron\"];\n  hello [shape=box label=\"printf 'hello\\\\n'\"];\n  saved [shape=note label=\"t256:\"];\n  hello -> saved;\n}", "modl": "#gl requires printf t256\n#gl env linux macos windows apptron\nhello square printf 'hello\\n'\nsaved hex t256:\nhello -> saved", "stdout": "t256:AAAAAAAGaGVsbG8K"}, {"name": "portable-t256-transform", "dot": "digraph {\n  graph [gl_requires=\"t256 tr\" gl_env=\"linux macos windows apptron\"];\n  input [shape=note label=\"t256:AAAAAAAGaGVsbG8K\"];\n  upper [shape=box label=\"tr a-z A-Z\"];\n  saved [shape=note label=\"t256:\"];\n  input -> upper;\n  upper -> saved;\n}", "modl": "#gl requires t256 tr\n#gl env linux macos windows apptron\ninput hex t256:AAAAAAAGaGVsbG8K\nupper square tr a-z A-Z\nsaved hex t256:\ninput -> upper\nupper -> saved", "stdout": "t256:AAAAAAAGSEVMTE8K"}]
+-- portable-tools.json --
+{
+  "assumptions": "Native targets assume gripeline, Python, Bash, and t256 are installed. Badges check command names and declared requirements; they do not validate every shell option or detect tools installed on your computer.",
+  "common": ["echo", "printf", "cat", "tee", "sort", "uniq", "wc", "head", "tail", "cut", "tr", "sed", "grep", "awk", "find", "xargs", "test", "true", "false", "pwd", "cd", "mkdir", "rm", "cp", "mv", "touch", "basename", "dirname", "env", "sh", "bash", "t256"],
+  "environments": {"linux": ["python3"], "macos": ["python3"], "windows": ["py", "cmd.exe"], "apptron": ["python3"]}
+}
+-- verify_gallery.py --
+import json, shlex, subprocess
+from gripeline import gripeline_api
+inventory = json.load(open('portable-tools.json'))
+for tool in inventory['common'] + inventory['environments']['apptron']:
+    assert subprocess.run(['bash', '-c', 'command -v ' + shlex.quote(tool)], stdout=subprocess.DEVNULL).returncode == 0, tool
+for example in json.load(open('portable-gallery.json')):
+    bash = None
+    for lang in ('dot', 'modl'):
+        result = gripeline_api(example[lang], lang)
+        assert not result['problems'], result['problems']
+        if bash is not None: assert result['bash'] == bash
+        bash = result['bash']
+        execution = subprocess.run(['bash', '-c', bash], capture_output=True, text=True)
+        assert execution.returncode == 0, execution.stderr
+        assert execution.stdout.strip() == example['stdout'].strip(), execution.stdout
+    print(example['name'] + ': twins passed')
+print('PORTABLE_GALLERY_OK')

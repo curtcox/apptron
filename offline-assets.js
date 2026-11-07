@@ -68,7 +68,7 @@
     }
   },
   "prefix": "apptron-offline",
-  "version": "apptron-offline-2848606416371bca",
+  "version": "apptron-offline-1afa7eada43d19cd",
   "assets": [
     "data-sw.js",
     "deployment-config.js",
@@ -215,7 +215,7 @@
     "examples/esbuild.txtar": "a32736a3d713ee12f2ccbf717925fc8b882810e86e1308dbf5e2969af02b0a21",
     "examples/fun.txtar": "09619ded69c0446f137d3ab4c658607e39539bd8fcb3cf57c2fd86c53f520db3",
     "examples/go-hello.txtar": "15a96a50cc72b318be7fd2f504b2e7f7b4f537817ccc62b0b224a296bb155d79",
-    "examples/gripeline.txtar": "c4821e038e2f8e98c66523f39a0cd771a247ddc3d507b9cd7734217f694a1ced",
+    "examples/gripeline.txtar": "716efdbcc7a3de5512ebb90c08cb5d9a4de7a6a6f8333a84b909fc533b5166b6",
     "examples/hello-shell.txtar": "d2242f4ade90895bf53224e3068338126cec32f2f094c8099f5ed7de0b72182d",
     "examples/node.txtar": "6c5a1d292c1f5439b841929aee5fd59dc5935fadb1455ddd6a0ddf0e3679b1e9",
     "examples/overlays/c.packages": "ab5c15ccd489126b9efabf0e22d9b38aa7fa46f82783ed310fd200dfdf36eac8",

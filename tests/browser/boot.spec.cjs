@@ -116,4 +116,6 @@ test('gripeline dot/modl twins run identically with an offline t256 source',asyn
  await expect.poll(()=>text(page),{timeout:90000}).toContain('Try: python3 gripeline.py run pipeline.modl');
  await page.evaluate(()=>ApptronOnline.host.sendKey('python3 gripeline.py build pipeline.dot > dot.sh && python3 gripeline.py build pipeline.modl > modl.sh && cmp dot.sh modl.sh && printf "GRIPELINE_OK=" && python3 gripeline.py run pipeline.modl\r'));
  await expect.poll(()=>text(page),{timeout:90000}).toContain('GRIPELINE_OK=6');
+ await page.evaluate(()=>ApptronOnline.host.sendKey('python3 verify_gallery.py\r'));
+ await expect.poll(()=>text(page),{timeout:180000}).toContain('PORTABLE_GALLERY_OK');
 });

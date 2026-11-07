@@ -192,3 +192,9 @@ is pending. `sync-runtime-lock.mjs` selects the new build in CI; after boot
 verification, the Runtime workflow publishes the immutable artifact and updates
 the lock, deferred runtime pins and offline manifest together. Gallery covers
 depend on their actual PNG sources, not unrelated runtime-lock bytes.
+
+Boot validation must regenerate deferred runtime pins and the offline manifest
+after building or downloading a runtime, before starting a browser. The
+service worker intentionally rejects new runtime bytes against an older
+release's hashes, even when both builds share the same upstream source commit.
+Both Runtime and Test workflows now perform that preparation explicitly.
