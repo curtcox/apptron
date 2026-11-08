@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "src/examples.js": "f7ba92a59717e678756b1249df25569dab78b3dc6fd8a076b4f5504debdfcea7",
-    "src/fragment-config.js": "78dcd63ee13469bc820ce2e33544dc605f37947b48d1339e05193d173d41c8c9",
+    "src/fragment-config.js": "93f9a0dd8756db3916a673e7778d159336b140b6226aeaa539a6b9dc7c0a543c",
     "scripts/render-gallery.cjs": "c4968483b19159458bb9080c18e34143e1c65bf5dca1f45d5a093d6462c82cfc",
     "examples/hello-shell.txtar": "d2242f4ade90895bf53224e3068338126cec32f2f094c8099f5ed7de0b72182d",
     "examples/screenshots/hello-shell.png": "a8acb7e96ad6af38ace3c667cea636b73ed48a920f996196b708d72d9b7988eb",

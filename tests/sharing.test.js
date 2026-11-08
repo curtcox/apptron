@@ -31,7 +31,7 @@ test('HashBin Publish saves snapshots and gzip overlays with the pinned SDK and 
  assert.equal((await store.publish(payload,{src})).cid,cidOf(payload));assert.equal(calls[0].options.contentType,'application/json');assert.deepEqual(calls[0].options.clientState,{snapshot:{src},overlay:false});
  assert.equal((await store.publish(overlay,{src},true)).cid,cidOf(overlay));assert.equal(calls[1].options.contentType,'application/gzip');assert.deepEqual([...calls[1].bytes],[31,139,8]);
  store.client.publish=async()=>({cid:cidOf(payload+' ')});await assert.rejects(store.publish(payload,{src}),/does not match|CID/);
- assert.equal('sha384-'+require('node:crypto').createHash('sha384').update(require('node:fs').readFileSync(new URL('../vendor/fragment-kit-v0.3.4/vendor/hashbin-sdk-v0.4.0.mjs',import.meta.url))).digest('base64'),'sha384-zzmaXw5svWRp0YF//G5ytyeqEowixccM/hHVDth46FnGrIlPS7fPki5vbhv+bWCr');
+ assert.equal('sha384-'+require('node:crypto').createHash('sha384').update(require('node:fs').readFileSync(new URL('../vendor/fragment-kit-v0.3.5/vendor/hashbin-sdk-v0.4.0.mjs',import.meta.url))).digest('base64'),'sha384-zzmaXw5svWRp0YF//G5ytyeqEowixccM/hHVDth46FnGrIlPS7fPki5vbhv+bWCr');
 });
 test('isolated editors save through a redirect that verifies original binary bytes and restores the snapshot',async()=>{
  const transactionStorage=memoryStore(),payload=new Uint8Array([31,139,8]);let mode,outcome='approve';

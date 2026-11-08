@@ -4,7 +4,7 @@ import { ApptronHost, ensureServiceWorker } from './apptron-host.js';
 import { parseSnapshot, serializeSnapshot, MAX_TEXT_BYTES } from './snapshot.js';
 import { MAX_OVERLAY_BYTES } from './overlay.js';
 import {config,urlState,LZString}from'./fragment-config.js';
-import{LocalDrafts,createShell,mountMobileTabs,createShareDialog,createQrDialog,OfflineClient}from'../vendor/fragment-kit-v0.3.4/src/index.js';
+import{LocalDrafts,compactShell,createShell,mountMobileTabs,createShareDialog,createQrDialog,OfflineClient}from'../vendor/fragment-kit-v0.3.5/src/index.js';
 import { HashBinDocuments, HashBinStore } from './hashbin.js';
 import { HashBinPanel } from './hashbin-panel.js';
 import { getRelay, setRelay } from './network.js';
@@ -24,7 +24,8 @@ const oldHeader=document.querySelector('.topbar'),brand=oldHeader.querySelector(
 const shell=createShell({config});shell.header.querySelector('.fk-brand').replaceChildren(...brand.childNodes);shell.header.querySelector('.fk-brand').href='./';
 for(const link of shell.header.querySelectorAll('a')){if(link.textContent==='Docs ↗')link.href='docs.html';if(link.textContent==='Gallery ↗')link.href='gallery.html';}
 for(const link of shell.drawer.body.querySelectorAll('a')){if(link.textContent==='Docs ↗')link.href='docs.html';if(link.textContent==='Gallery ↗')link.href='gallery.html';}
-shell.header.querySelector('.fk-more').id='more-toggle';oldHeader.remove();
+shell.header.querySelector('.fk-more').id='more-toggle';
+compactShell({header:shell.header,status:document.querySelector('.statusbar')});oldHeader.remove();
 const toolbar=document.querySelector('.toolbar'),menu=document.querySelector('.more .menu');
 for(const id of ['run','share','qr'])shell.toolbar.append($(id));
 $('share').textContent='Share';$('qr').textContent='QR';
@@ -58,9 +59,9 @@ function sourceChanged() {
 function setSource(value, origin = provenance('local')) { parseSnapshot(value); drafts.opened();urlState.cancel(); sourceOrigin = origin; applying = true; editor.setValue(value, -1); applying = false; dirty = false; }
 function replaceSource(value, origin = sourceOrigin) { if (dirty && !confirm('Replace your unsaved editor changes with this snapshot?')) return false; setSource(value, origin); return true; }
 function view(name){tabs?.select(name==='code'?0:1);editor.resize();host.resize();}
-tabs=mountMobileTabs({container:document.querySelector('.workspace'),panels:[{label:'Code',panel:document.querySelector('.code-pane')},{label:'Preview',panel:document.querySelector('.preview-pane')}],onChange:index=>{document.body.dataset.view=index?'preview':'code';editor.resize();host.resize();}});
-document.querySelectorAll('.fk-tabs button').forEach((button,index)=>button.id=index?'show-preview':'show-code');
-tabs.select(0);
+tabs=mountMobileTabs({desktop:true,container:document.querySelector('.workspace'),panels:[{label:'Code',panel:document.querySelector('.code-pane')},{label:'Preview',panel:document.querySelector('.preview-pane')}],onChange:index=>{document.body.dataset.view=index===-1?'split':index?'preview':'code';editor.resize();host.resize();}});
+[...document.querySelectorAll('.fk-tabs button')].slice(0,2).forEach((button,index)=>button.id=index?'show-preview':'show-code');
+if(matchMedia('(max-width:767px)').matches)tabs.select(0);
 const store = new HashBinStore({ clientId: document.querySelector('meta[name="hashbin-client-id"]').content, redirectUri: new URL('./', location.href).href, storage: storage('localStorage', 'apptron:oauth:'), transactionStorage: session });
 let panel = new HashBinPanel({ store, container:shell.drawer.body, getSnapshot: () => { parseSnapshot(source()); return { src: source(), type: 'apptron' }; }, getFingerprint: source,
   onLoad: (snapshot, cid) => {
