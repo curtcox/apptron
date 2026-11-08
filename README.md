@@ -155,8 +155,9 @@ HashBin client registration require owner setup; no new registration is implied.
 
 Canonical registration (2026-11-05): `app_4988e882-b216-42ef-8d95-9f1747c6b55e`, with the sole return URL `https://apptron.hashbin.page/`. The GitHub Pages recovery copy preserves old links and drafts; Publish approval is available from the canonical site.
 
-## Prepared interface update
+## Compact interface
 
-This branch prepares Fragment Kit v0.3.5 for compact controls, readable dialogs,
-and single-pane or split workspace views. On phones, status details are in More.
-Shared release publication and site deployment are still pending.
+This app uses released Fragment Kit v0.3.5 for compact controls, readable dialogs,
+and individual-pane or split workspace views. On phones, primary feedback stays
+visible while status details are available in More.
+Current deployment evidence is recorded in the [shared rollout status](https://github.com/curtcox/Tools-for-pages-with-state-in-URL-fragments/blob/main/todo/rollout-status.md).
