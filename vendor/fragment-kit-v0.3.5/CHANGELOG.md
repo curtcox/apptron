@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.5
+
+* Compact shared chrome and an adapter for existing application action/status bars.
+* Explicit light/dark control colors, denser More menus and an always-visible dialog close control.
+* Keep concise primary run/error feedback visible on phones while details live in More.
+* Optional desktop workspace tabs with single-panel and split views.
+
 ## 0.3.4 — 2026-11-04
 
 * Let consumer contract adapters provide valid source fixtures for structured

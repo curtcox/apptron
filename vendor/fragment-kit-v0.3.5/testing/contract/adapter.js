@@ -7,7 +7,7 @@ const defaultAdapter = {
   ready: 'body[data-ready="true"]', editor: '#source', status: '#app-status', draftKey: 'fragment-notes:document',
   more: '.fk-more', resume: '#resume-work', drafts: '#draft-dialog', restore: '#restore-work',
   share: '#share-open', shareDialog: '#share-dialog', shareLink: '#share-link', qr: '#qr-open', qrDialog: '#qr-dialog',
-  kitURL: './vendor/fragment-kit-v0.3.4/src/index.js', example: 'welcome', tabs: ['Write', 'Read'], cachePrefix: 'fragment-notes-',
+  kitURL: './vendor/fragment-kit-v0.3.5/src/index.js', example: 'welcome', tabs: ['Write', 'Read'], cachePrefix: 'fragment-notes-',
   configureHashBin: async (context, clientId) => {
     await context.route('**/demo/config.js', async route => {
       const response = await route.fetch();

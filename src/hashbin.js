@@ -1,4 +1,4 @@
-import * as kit from '../vendor/fragment-kit-v0.3.4/src/index.js';
+import * as kit from '../vendor/fragment-kit-v0.3.5/src/index.js';
 import{config,type,urlState,HashBinDocuments,serializeLegacy,publishTransactions}from'./fragment-config.js';
 export{HashBinDocuments};export const REDIRECT_BYTES=512*1024;
 /** App-owned gzip overlays and COOP redirect policy, using the shared SDK/CID/store core. */
