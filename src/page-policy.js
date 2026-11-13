@@ -4,6 +4,8 @@
   const base = new URL('./', location.href);
   const at = path => new URL(path, base).href;
   const vm = document.documentElement.dataset.apptron === 'vm';
+  const aiFrame = !vm && base.href === 'https://apptron.hashbin.page/' ? ' https://ai.hashbin.page' : '';
+  const aiProviders = !vm && base.href === 'https://curtcox.github.io/apptron/' ? ' https://api.openai.com https://openrouter.ai https://api.anthropic.com https://generativelanguage.googleapis.com' : '';
   const params = new URLSearchParams(location.hash.slice(1));
   const configuredVM = globalThis.APPTRON_DEPLOYMENT?.vmURL;
   const vmFrame = configuredVM ? new URL(configuredVM).href : at('vm.html');
@@ -28,8 +30,8 @@
     `style-src ${cachedResponseSource} ${at('deployment-config.js')} ${at('src/')} ${at('vendor/')} ${at('runtime/')} 'unsafe-inline'`,
     `img-src ${at('')} data: blob:`,
     `font-src ${cachedResponseSource} ${at('vendor/')} data:`,
-    `connect-src ${cachedResponseSource} ${vm ? 'blob: ' + at('runtime/') + ' ' + at('runtime.lock') + ' ' + at('vm-data/') + ' ' + relaySource : at('') + ' https://256t.us https://hashbin.org https://is.gd https://api.allorigins.win'}`,
-    `frame-src ${vm ? "'none'" : vmFrame + " " + vmCacheSource}`,
+    `connect-src ${cachedResponseSource} ${vm ? 'blob: ' + at('runtime/') + ' ' + at('runtime.lock') + ' ' + at('vm-data/') + ' ' + relaySource : at('') + ' https://256t.us https://hashbin.org https://is.gd https://api.allorigins.win' + aiProviders}`,
+    `frame-src ${vm ? "'none'" : vmFrame + " " + vmCacheSource + aiFrame}`,
     `media-src ${vm ? "'none'" : 'blob:'}`,
     `object-src 'none'`, `base-uri 'none'`, `form-action 'none'`,
   ].join('; ');

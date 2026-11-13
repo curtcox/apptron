@@ -72,7 +72,7 @@
     }
   },
   "prefix": "apptron-offline",
-  "version": "apptron-offline-5dbd1cecd4d05f2f",
+  "version": "apptron-offline-f9f14058bcb529d7",
   "assets": [
     "ai-comparison.json",
     "ai-suite.json",
@@ -341,7 +341,7 @@
     "src/offline-bootstrap.js": "8b25a84714f61842988a8c78a738eda2321471ce0cbcd96732b9c27871b79136",
     "src/offline-cache.js": "816be5fd80ae0056ac450a2e32ce6688425aebffcea708785256baf6087be252",
     "src/overlay.js": "104bcfa894f7d9dc74287271745ec6b303cf34c18fabc1eef28cc46dee195f22",
-    "src/page-policy.js": "1e751c7910bf0f27676c2bf76a4e86aa0ee6bb410d73d2a3c91f959a38eb25af",
+    "src/page-policy.js": "15d03c4e26108be471b11f7b49a74f12cf20aa65a1e5d35b846d9de47b56ef25",
     "src/qr-panel.js": "5a952a12cffa815ef6b49c5ebad4d097f6231ac617f9e23dffca1c9bff6eef13",
     "src/r2fs.js": "2fd7466e7769c983ca24cf73b0484b632d8158b5f281b7b0cb3ed81dff8c238a",
     "src/read-limited.js": "70d86b6493b6fbec92659f58be75b2b6662e8cc8130b4f9571d0af6b4392cffa",
