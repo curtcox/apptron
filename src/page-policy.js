@@ -17,7 +17,7 @@
   // Firefox checks synthetic cached responses against the worker entry URL.
   // Keep the exception exact; user-data and arbitrary origin scripts remain excluded.
   const cachedResponseSource=at('data-sw.js'),vmCacheSource=new URL('data-sw.js',vmFrame).href;
-  const serviceWorkerSources=['data-sw.js','offline-assets.js','src/data-sw.js','src/offline-cache.js','src/offline-bootstrap.js','src/runtime-integrity.js','src/runtime-cache.js','src/data-access.js','src/bridge.js','src/store.js','src/r2fs.js','src/tar.js','src/snapshot.js','src/read-limited.js','src/content-id.js','vendor/fragment-kit-v0.3.5/src/offline/sw-core.js','vendor/fragment-kit-v0.3.5/src/core/cid.js','vendor/fragment-kit-v0.3.5/src/core/bytes.js'].map(at).join(' ');
+  const serviceWorkerSources=['data-sw.js','offline-assets.js','src/data-sw.js','src/offline-cache.js','src/offline-bootstrap.js','src/runtime-integrity.js','src/runtime-cache.js','src/data-access.js','src/bridge.js','src/store.js','src/r2fs.js','src/tar.js','src/snapshot.js','src/read-limited.js','src/content-id.js','vendor/fragment-kit-v0.4.3/src/offline/sw-core.js','vendor/fragment-kit-v0.4.3/src/core/cid.js','vendor/fragment-kit-v0.4.3/src/core/bytes.js'].map(at).join(' ');
   const policy = document.createElement('meta');
   policy.dataset.apptronPolicy = '1';
   policy.httpEquiv = 'Content-Security-Policy';

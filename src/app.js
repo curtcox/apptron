@@ -1,10 +1,12 @@
+import {mountClientAi,aiCallback} from './ai-client.js';
+if(aiCallback()) await new Promise(()=>{});
 import { deployment } from './deployment.js';
 import { readDraft, writeDraft, provenance, provenanceLabel } from './draft.js';
 import { ApptronHost, ensureServiceWorker } from './apptron-host.js';
 import { parseSnapshot, serializeSnapshot, MAX_TEXT_BYTES } from './snapshot.js';
 import { MAX_OVERLAY_BYTES } from './overlay.js';
-import {config,urlState,LZString}from'./fragment-config.js';
-import{LocalDrafts,compactShell,createShell,mountMobileTabs,createShareDialog,createQrDialog,OfflineClient}from'../vendor/fragment-kit-v0.3.5/src/index.js';
+import {config,type,urlState,LZString}from'./fragment-config.js';
+import{LocalDrafts,compactShell,createShell,mountMobileTabs,createShareDialog,createQrDialog,OfflineClient}from'../vendor/fragment-kit-v0.4.3/src/index.js';
 import { HashBinDocuments, HashBinStore } from './hashbin.js';
 import { HashBinPanel } from './hashbin-panel.js';
 import { getRelay, setRelay } from './network.js';
@@ -13,7 +15,7 @@ import { setupKeybar } from './keybar.js';
 import { installTxtarMode } from './txtar-mode.js';
 const $ = id => document.getElementById(id);
 Object.assign(globalThis,{LZString,HashBinDocuments});
-let navigationError=null;const status = message => { if(!navigationError)$('status').textContent = message; };
+let aiUI=null,navigationError=null;const status = message => { if(!navigationError)$('status').textContent = message; };
 try { deployment(); } catch (error) { status(error.message); for (const button of document.querySelectorAll('button')) button.disabled = true; throw error; }
 const storage = (kind, prefix) => ({
   getItem: key => { try { return window[kind].getItem(prefix + key); } catch { return null; } },
@@ -56,7 +58,7 @@ function sourceChanged() {
   catch { $('file-count').textContent = size > MAX_TEXT_BYTES ? 'Over 1 MiB limit' : 'Check snapshot format'; }
   if(!applying)try{lastNavigation=urlState.write({src:source()},{run:false});}catch(error){status(error.message);}
 }
-function setSource(value, origin = provenance('local')) { parseSnapshot(value); drafts.opened();urlState.cancel(); sourceOrigin = origin; applying = true; editor.setValue(value, -1); applying = false; dirty = false; }
+function setSource(value, origin = provenance('local'), {fromAi=false}={}) { if(!fromAi)aiUI?.cancel(); parseSnapshot(value); drafts.opened();urlState.cancel(); sourceOrigin = origin; applying = true; editor.setValue(value, -1); applying = false; dirty = false; }
 function replaceSource(value, origin = sourceOrigin) { if (dirty && !confirm('Replace your unsaved editor changes with this snapshot?')) return false; setSource(value, origin); return true; }
 function view(name){tabs?.select(name==='code'?0:1);editor.resize();host.resize();}
 tabs=mountMobileTabs({desktop:true,container:document.querySelector('.workspace'),panels:[{label:'Code',panel:document.querySelector('.code-pane')},{label:'Preview',panel:document.querySelector('.preview-pane')}],onChange:index=>{document.body.dataset.view=index===-1?'split':index?'preview':'code';editor.resize();host.resize();}});
@@ -209,3 +211,5 @@ window.addEventListener('popstate',()=>openURL(location.href));
 window.addEventListener('offline-before-reload',()=>{saveDraft();writeURL();});
 window.ApptronOnline = { editor, host, panel, getSource: source, setSource:(value,origin)=>{setSource(value,origin);writeURL();},openURL, initialized: initializeWithIsolation() };
 host.config().then(lock => { $('runtime-commit').textContent = lock.commit.slice(0, 7); }).catch(error => status(error.message));
+
+aiUI=await mountClientAi({config,type,urlState,getSnapshot:()=>({src:source()}),getFingerprint:source,container:shell.drawer.body,toolbar:shell.toolbar,status,onApply:doc=>{host.revokeNetwork();networkLabel();setSource(doc.src,provenance('local'),{fromAi:true});sourceChanged();$('vm-dot').classList.add('muted');status('Change accepted — press Run to boot. VM files require Capture before asking about them.');}});

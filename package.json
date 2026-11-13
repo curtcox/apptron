@@ -16,7 +16,8 @@
     "test:urls": "node tests/browser/url-state.cjs",
     "check": "node scripts/check.mjs",
     "gallery": "node scripts/gallery-catalog.mjs && node scripts/render-kit-gallery.mjs",
-    "offline": "node scripts/update-offline.mjs"
+    "offline": "node scripts/update-offline.mjs",
+    "test:ai:browser": "node tests/browser/ai.mjs"
   },
   "repository": {
     "type": "git",

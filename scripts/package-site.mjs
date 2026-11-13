@@ -1,4 +1,4 @@
-import{generateOffline}from'../vendor/fragment-kit-v0.3.5/tools/offline-assets.mjs';
+import{generateOffline}from'../vendor/fragment-kit-v0.4.3/tools/offline-assets.mjs';
 import { configuration, configurationScript, vmHeaders } from './deployment-config.mjs';
 import { execFileSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
@@ -9,12 +9,12 @@ const option = (name, fallback = '') => { const at = args.indexOf('--' + name); 
 const config = configuration({ role: option('role', process.env.APPTRON_ROLE || 'editor'), vmURL: option('vm-url', process.env.APPTRON_VM_URL || ''), editorOrigin: option('editor-origin', process.env.APPTRON_EDITOR_ORIGIN || '') });
 const output = option('out', config.role === 'vm' ? '.build/vm-site' : 'dist');
 if (!['dist', '.build/vm-site', '.build/editor-site'].includes(output)) throw new Error('Output must be dist, .build/vm-site or .build/editor-site.'); rmSync(output, { recursive: true, force: true }); mkdirSync(output,{recursive:true});
-for (const file of ['deployment-config.js','index.html', 'gallery.html', 'docs.html', 'vm.html', 'data-sw.js', 'favicon.svg', 'runtime.lock', 'runtime-assets.json','fragment-kit.config.json','manifest.webmanifest','gallery', 'src', 'vendor', 'examples', 'LICENSE-graphvizonline']) cpSync(file, `${output}/${file}`, { recursive: true });
+for (const file of ['ai-comparison.json','ai-suite.json','deployment-config.js','index.html', 'gallery.html', 'docs.html', 'vm.html', 'data-sw.js', 'favicon.svg', 'runtime.lock', 'runtime-assets.json','fragment-kit.config.json','manifest.webmanifest','gallery', 'src', 'vendor', 'examples', 'LICENSE-graphvizonline']) cpSync(file, `${output}/${file}`, { recursive: true });
 writeFileSync(`${output}/deployment-config.js`, configurationScript(config));
 if (config.role === 'vm') {
- for (const file of ['index.html','gallery.html','docs.html','examples','vendor','gallery','fragment-kit.config.json','manifest.webmanifest']) rmSync(`${output}/${file}`, { recursive: true, force: true });
- for (const file of ['app.js','hashbin.js','hashbin-panel.js','share-links.js','qr-panel.js','gallery.js','examples.js','keybar.js','txtar-mode.js','local-drafts.js','fragment-config.js','fragment-ui.css','gallery-catalog.js','gallery-kit.css']) rmSync(`${output}/src/${file}`, { force: true });
- for(const file of ['LICENSE','src/core/bytes.js','src/core/cid.js','src/offline/sw-core.js']){const to=output+'/vendor/fragment-kit-v0.3.5/'+file;mkdirSync(to.slice(0,to.lastIndexOf('/')),{recursive:true});cpSync('vendor/fragment-kit-v0.3.5/'+file,to);}
+ for (const file of ['ai-comparison.json','ai-suite.json','index.html','gallery.html','docs.html','examples','vendor','gallery','fragment-kit.config.json','manifest.webmanifest']) rmSync(`${output}/${file}`, { recursive: true, force: true });
+ for (const file of ['ai-client.js','app.js','hashbin.js','hashbin-panel.js','share-links.js','qr-panel.js','gallery.js','examples.js','keybar.js','txtar-mode.js','local-drafts.js','fragment-config.js','fragment-ui.css','gallery-catalog.js','gallery-kit.css']) rmSync(`${output}/src/${file}`, { force: true });
+ for(const file of ['LICENSE','src/core/bytes.js','src/core/cid.js','src/offline/sw-core.js']){const to=output+'/vendor/fragment-kit-v0.4.3/'+file;mkdirSync(to.slice(0,to.lastIndexOf('/')),{recursive:true});cpSync('vendor/fragment-kit-v0.4.3/'+file,to);}
  writeFileSync(output+'/_headers', vmHeaders(config.editorOrigin, config.vmURL));
 }
 if (config.role === 'editor' && config.vmURL) rmSync(`${output}/vm.html`);
@@ -24,7 +24,7 @@ if (!existsSync(`${runtime}/runtime.json`)) throw new Error('Install the locked 
 execFileSync(process.execPath, ['scripts/verify-runtime.mjs', runtime], { stdio: 'inherit' });
 cpSync(runtime, `${output}/${runtime}`, { recursive: true });
 writeFileSync(output + '/.nojekyll', '');
-const baseFiles=config.role==='vm'?['vm.html','data-sw.js','deployment-config.js','runtime.lock','runtime-assets.json','src','vendor']:['index.html','vm.html','gallery.html','docs.html','favicon.svg','deployment-config.js','fragment-kit.config.json','manifest.webmanifest','runtime.lock','runtime-assets.json','data-sw.js','src','vendor/ace','vendor/fragment-kit-v0.3.5/src','vendor/fragment-kit-v0.3.5/vendor','examples','gallery'];
+const baseFiles=config.role==='vm'?['vm.html','data-sw.js','deployment-config.js','runtime.lock','runtime-assets.json','src','vendor']:['ai-comparison.json','ai-suite.json','index.html','vm.html','gallery.html','docs.html','favicon.svg','deployment-config.js','fragment-kit.config.json','manifest.webmanifest','runtime.lock','runtime-assets.json','data-sw.js','src','vendor/ace','vendor/fragment-kit-v0.4.3/src','vendor/fragment-kit-v0.4.3/vendor','examples','gallery'];
 writeFileSync(output+'/offline.config.json',JSON.stringify({prefix:'apptron-offline',files:baseFiles.filter(file=>existsSync(output+'/'+file)),metadata:{runtime:JSON.parse(readFileSync('runtime-assets.json'))}},null,2)+'\n');
 await generateOffline(output+'/offline.config.json');
 const walk = path => readdirSync(path).reduce((size, name) => size + (statSync(`${path}/${name}`).isDirectory() ? walk(`${path}/${name}`) : statSync(`${path}/${name}`).size), 0);

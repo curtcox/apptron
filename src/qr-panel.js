@@ -1,5 +1,5 @@
 // Compatibility for the original consumer tests; the editor uses the shared QR dialog.
-import{bytes,encodeQr}from'../vendor/fragment-kit-v0.3.5/src/index.js';
+import{bytes,encodeQr}from'../vendor/fragment-kit-v0.4.3/src/index.js';
 export const QR_MAX_BYTES=2953;
 export const canEncodeQR=link=>bytes(link).length<=QR_MAX_BYTES&&Boolean(encodeQr(link));
 export function renderQR(link,canvas){

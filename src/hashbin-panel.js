@@ -1,4 +1,4 @@
-import{HashBinPanel as SharedPanel,bytes}from'../vendor/fragment-kit-v0.3.5/src/index.js';
+import{HashBinPanel as SharedPanel,bytes}from'../vendor/fragment-kit-v0.4.3/src/index.js';
 import{urlState,serializeLegacy}from'./fragment-config.js';
 import{REDIRECT_BYTES}from'./hashbin.js';
 /** The shared panel handles text. The consumer adds gzip attachment selection and warnings. */

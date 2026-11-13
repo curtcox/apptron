@@ -1,4 +1,4 @@
-import * as kit from '../vendor/fragment-kit-v0.3.5/src/index.js';
+import * as kit from '../vendor/fragment-kit-v0.4.3/src/index.js';
 import settings from '../fragment-kit.config.json' with {type:'json'};
 import{parseSnapshot,MAX_TEXT_BYTES}from'./snapshot.js';
 export const config=kit.createConfig(settings);
@@ -22,4 +22,7 @@ export const ShareLinks={build({url,code,compress}){const doc=type.normalize({sr
 export const readShareURL=input=>{const intent=urlState.parse(input);return intent.kind==='source'?intent.doc.src:null;};
 export const LZString={compressToEncodedURIComponent:kit.compress,decompressFromEncodedURIComponent:kit.decompress};
 export function publishTransactions(storage,clientId=config.hashbinClientId){if(!storage)return undefined;const current=kit.createStorage({prefix:config.storagePrefix,storage}),owned=key=>key.startsWith('hashbin:publish:'+clientId+':');return{getItem(key){const value=current.getItem(key);if(value!=null||!owned(key))return value;try{return storage.getItem(key);}catch{return null;}},setItem:(key,value)=>current.setItem(key,value),removeItem(key){current.removeItem(key);if(owned(key))try{storage.removeItem(key);}catch{}}};}
-export{ShareClient}from'../vendor/fragment-kit-v0.3.5/src/index.js';
+export{ShareClient}from'../vendor/fragment-kit-v0.4.3/src/index.js';
+
+// AI is a separate opt-in entry point; document loading never creates a connection.
+type.ai={"describe":"Apptron txtar snapshot src only. Preserve headers, file boundaries, file names and unrelated content. This is editor text, not live VM files: Capture is required for live VM changes. Acceptance stops the VM and revokes networking. Never boot or enable networking from a proposal.","paths":["/src"]};
